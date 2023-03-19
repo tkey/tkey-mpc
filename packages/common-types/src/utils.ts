@@ -1,11 +1,12 @@
-import { decrypt as ecDecrypt, encrypt as ecEncrypt, generatePrivate } from "@toruslabs/eccrypto";
+import { decrypt as ecDecrypt, encrypt as ecEncrypt, generatePrivate as ecGeneratePrivate, getPublic as ecGetPublic } from "@toruslabs/eccrypto";
 import BN from "bn.js";
-import { ec as EC } from "elliptic";
+import { curve, ec as EC } from "elliptic";
 import { serializeError } from "serialize-error";
 import { keccak256, toChecksumAddress } from "web3-utils";
 
 import { EncryptedMessage } from "./baseTypes/commonTypes";
 
+// TODO remove the following two functions?
 // const privKeyBnToEcc = (bnPrivKey) => {
 //   return bnPrivKey.toBuffer("be", 32);
 // };
@@ -14,7 +15,64 @@ import { EncryptedMessage } from "./baseTypes/commonTypes";
 //   return getPublic(privKeyBnToEcc(bnPrivKey));
 // };
 
-export const ecCurve = new EC("secp256k1");
+// TODO: Use curve ed25519
+//
+// We want to use ed25519 for everything except encryption. Encryption relies on
+// package `eccrypto` which uses curve secp256k1. Check for every usage of
+// `encrypt` and `decrypt` if supplied keys are on curve secp256k1. Generate
+// encryption using function `genEncKeyPair` defined below.
+//
+// All other curve usage should rely on package `elliptic` instantiated with the
+// desired curve (e.g., ed25519). Ideally instantiate elliptic only once in a
+// central location and use this instance across the whole codebase to avoid
+// mixing different curves by mistake.
+//
+// In particular this means:
+//
+// Replace the usage of import { generatePrivate } from "@toruslabs/eccrypto";
+// with function `generateScalar()` defined above, which uses elliptic's
+// curve.genKeyPair().getPrivate().
+//
+// Replace the usage of import { getPublic } from "@toruslabs/eccrypto"; with
+// with function `scalarBaseMul()` defined above, which uses elliptic's
+// key.getPublic().
+//
+// Point normalization: Furthermore, check codebase for usage of EllipticPoint.x
+// and EllipticPoint.y, where EllipticPoint refers to a curve point from package
+// `elliptic`. These produce coordinates that are potentially not normalized and
+// therefore most likely not suitable for serialization or point comparison.
+// They are also not exposed by the interface curve.base.BasePoint, which should
+// be as the point type. Instead, use the interface methods BasePoint.getX() and
+// BasePoint.getY(). Moreover, for comparison, instead of comparing the x and y
+// coordinates, use function BasePoint.eq(otherPoint).
+//
+// Point serialization: There is usually a standardized way how to encode curve
+// points. This encoding may be different for different curves. Ensure that
+// point encoding is suitable for the target use case.
+
+const ec = new EC("ed25519");
+export const ecCurve = ec;
+export function generateScalar() {
+  const k = ecCurve.genKeyPair();
+  return k.getPrivate();
+}
+export function scalarBaseMul(s: BN) {
+  return ec.keyFromPrivate(s.toString(16)).getPublic();
+}
+
+export type EncryptionKey = Buffer;
+export type DecryptionKey = Buffer;
+
+export type EncryptionKeyPair = {
+  sk: EncryptionKey;
+  pk: DecryptionKey;
+};
+
+export function genEncKeyPair(): EncryptionKeyPair {
+  const sk = ecGeneratePrivate();
+  const pk = ecGetPublic(sk);
+  return { sk, pk };
+}
 
 // Wrappers around ECC encrypt/decrypt to use the hex serialization
 // TODO: refactor to take BN
@@ -79,7 +137,7 @@ export function normalize(input: number | string): string {
 }
 
 export function generatePrivateExcludingIndexes(shareIndexes: Array<BN>): BN {
-  const key = new BN(generatePrivate());
+  const key = generateScalar();
   if (shareIndexes.find((el) => el.eq(key))) {
     return generatePrivateExcludingIndexes(shareIndexes);
   }
