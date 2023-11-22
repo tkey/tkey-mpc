@@ -29,11 +29,16 @@ class Point implements IPoint {
   encode(enc: string, params?: any): Buffer {
     switch (enc) {
       case "arr":
-        return Buffer.concat([Buffer.from("0x04", "hex"), Buffer.from(this.x.toString("hex"), "hex"), Buffer.from(this.y.toString("hex"), "hex")]);
+        return Buffer.concat([
+          Buffer.from("04", "hex"),
+          Buffer.from(this.x.toString("hex", 64), "hex"),
+          Buffer.from(this.y.toString("hex", 64), "hex"),
+        ]);
       case "elliptic-compressed": {
         // TODO: WHAT IS THIS.?
         let ec = params;
         ec = ecCurve;
+        // should we fix this as well?
         const key = ec.keyFromPublic({ x: this.x.toString("hex"), y: this.y.toString("hex") }, "hex");
         return Buffer.from(key.getPublic(true, "hex"));
       }
