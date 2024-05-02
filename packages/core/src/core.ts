@@ -585,7 +585,8 @@ class ThresholdKey implements ITKey {
 
     // Input shares to ensure atomicity
     sharesToInput.forEach((share) => {
-      this.inputShareStore(share);
+      // this.inputShareStore(share);
+      this.inputShareStoreSafe(share);
     });
 
     if (sharesLeft > 0) {
@@ -1418,11 +1419,7 @@ class ThresholdKey implements ITKey {
     if (!(Array.isArray(this._localMetadataTransitions[0]) && this._localMetadataTransitions[0].length > 0)) return;
 
     // get lock
-    let acquiredLock = false;
-    if (this.lastFetchedCloudMetadata) {
-      await this.acquireWriteMetadataLock();
-      acquiredLock = true;
-    }
+    await this.acquireWriteMetadataLock();
     try {
       await this.storageLayer.setMetadataStream({
         input: this._localMetadataTransitions[1],
@@ -1436,7 +1433,7 @@ class ThresholdKey implements ITKey {
     this._localMetadataTransitions = [[], []];
     this.lastFetchedCloudMetadata = this.metadata.clone();
     // release lock
-    if (acquiredLock) await this.releaseWriteMetadataLock();
+    await this.releaseWriteMetadataLock();
   }
 
   // Returns a new instance of metadata with a clean state. All the previous state will be reset.
@@ -1688,31 +1685,33 @@ class ThresholdKey implements ITKey {
 
     // we check the metadata of a random share we have on the latest polynomial we know that reflects the cloud
     // below we cater for if we have an existing share or need to create the share in the SDK
-    let randomShareStore: ShareStore;
-    const latestPolyIDOnCloud = this.lastFetchedCloudMetadata.getLatestPublicPolynomial().getPolynomialID();
-    const shareIndexesExistInSDK = Object.keys(this.shares[latestPolyIDOnCloud]);
-    const randomIndex = shareIndexesExistInSDK[Math.floor(Math.random() * (shareIndexesExistInSDK.length - 1))];
-    if (shareIndexesExistInSDK.length >= 1) {
-      randomShareStore = this.shares[latestPolyIDOnCloud][randomIndex];
-    } else {
-      randomShareStore = this.outputShareStore(randomIndex, latestPolyIDOnCloud);
-    }
-    const latestRes = await this.catchupToLatestShare({ shareStore: randomShareStore });
-    const latestMetadata = latestRes.shareMetadata;
+    if (this.lastFetchedCloudMetadata) {
+      let randomShareStore: ShareStore;
+      const latestPolyIDOnCloud = this.lastFetchedCloudMetadata.getLatestPublicPolynomial().getPolynomialID();
+      const shareIndexesExistInSDK = Object.keys(this.shares[latestPolyIDOnCloud]);
+      const randomIndex = shareIndexesExistInSDK[Math.floor(Math.random() * (shareIndexesExistInSDK.length - 1))];
+      if (shareIndexesExistInSDK.length >= 1) {
+        randomShareStore = this.shares[latestPolyIDOnCloud][randomIndex];
+      } else {
+        randomShareStore = this.outputShareStore(randomIndex, latestPolyIDOnCloud);
+      }
+      const latestRes = await this.catchupToLatestShare({ shareStore: randomShareStore });
+      const latestMetadata = latestRes.shareMetadata;
 
-    // read errors for what each means
-    if (latestMetadata.nonce > this.lastFetchedCloudMetadata.nonce) {
-      throw CoreError.acquireLockFailed(`unable to acquire write access for metadata due to
-      lastFetchedCloudMetadata (${this.lastFetchedCloudMetadata.nonce})
-           being lower than last written metadata nonce (${latestMetadata.nonce}). perhaps update metadata SDK (create new tKey and init)`);
-    } else if (latestMetadata.nonce < this.lastFetchedCloudMetadata.nonce) {
-      throw CoreError.acquireLockFailed(`unable to acquire write access for metadata due to
-      lastFetchedCloudMetadata (${this.lastFetchedCloudMetadata.nonce})
-      being higher than last written metadata nonce (${latestMetadata.nonce}). this should never happen as it
-      should only ever be updated by getting metadata)`);
+      // read errors for what each means
+      if (latestMetadata.nonce > this.lastFetchedCloudMetadata.nonce) {
+        throw CoreError.acquireLockFailed(`unable to acquire write access for metadata due to
+        lastFetchedCloudMetadata (${this.lastFetchedCloudMetadata.nonce})
+            being lower than last written metadata nonce (${latestMetadata.nonce}). perhaps update metadata SDK (create new tKey and init)`);
+      } else if (latestMetadata.nonce < this.lastFetchedCloudMetadata.nonce) {
+        throw CoreError.acquireLockFailed(`unable to acquire write access for metadata due to
+        lastFetchedCloudMetadata (${this.lastFetchedCloudMetadata.nonce})
+        being higher than last written metadata nonce (${latestMetadata.nonce}). this should never happen as it
+        should only ever be updated by getting metadata)`);
+      }
     }
 
-    const res = await this.storageLayer.acquireWriteLock({ privKey: this.privKey });
+    const res = await this.storageLayer.acquireWriteLock({ privKey: this.serviceProvider.postboxKey });
     if (res.status !== 1) throw CoreError.acquireLockFailed(`lock cannot be acquired from storage layer status code: ${res.status}`);
 
     // increment metadata nonce for write session
@@ -1723,7 +1722,7 @@ class ThresholdKey implements ITKey {
 
   async releaseWriteMetadataLock(): Promise<void> {
     if (!this.haveWriteMetadataLock) throw CoreError.releaseLockFailed("releaseWriteMetadataLock - don't have metadata lock to release");
-    const res = await this.storageLayer.releaseWriteLock({ privKey: this.privKey, id: this.haveWriteMetadataLock });
+    const res = await this.storageLayer.releaseWriteLock({ privKey: this.serviceProvider.postboxKey, id: this.haveWriteMetadataLock });
     if (res.status !== 1) throw CoreError.releaseLockFailed(`lock cannot be released from storage layer status code: ${res.status}`);
     this.haveWriteMetadataLock = "";
   }
