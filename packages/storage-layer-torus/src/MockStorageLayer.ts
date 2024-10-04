@@ -10,7 +10,7 @@ import {
 import BN from "bn.js";
 import stringify from "json-stable-stringify";
 
-class MockStorageLayer implements IStorageLayer {
+export class MockStorageLayer implements IStorageLayer {
   dataMap: {
     [key: string]: unknown;
   };
@@ -108,5 +108,3 @@ class MockStorageLayer implements IStorageLayer {
     };
   }
 }
-
-export default MockStorageLayer;

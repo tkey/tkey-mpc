@@ -1,6 +1,5 @@
 import {
   decrypt,
-  ecCurve,
   EncryptedMessage,
   FactorEnc,
   getPubKeyPoint,
@@ -13,6 +12,7 @@ import {
   PublicPolynomialMap,
   PublicShare,
   PublicSharePolyIDShareIndexMap,
+  secp256k1,
   Share,
   ShareDescriptionMap,
   ShareMap,
@@ -23,10 +23,10 @@ import {
 import BN from "bn.js";
 import stringify from "json-stable-stringify";
 
-import CoreError from "./errors";
+import { CoreError } from "./errors";
 import { polyCommitmentEval } from "./lagrangeInterpolatePolynomial";
 
-class Metadata implements IMetadata {
+export class Metadata implements IMetadata {
   pubKey: Point;
 
   publicPolynomials: PublicPolynomialMap;
@@ -328,7 +328,7 @@ class Metadata implements IMetadata {
     }
 
     return {
-      pubKey: this.pubKey.encode("elliptic-compressed", { ec: ecCurve }).toString(),
+      pubKey: this.pubKey.toSEC1(secp256k1, true).toString("hex"),
       polyIDList: serializedPolyIDList,
       scopedStore: this.scopedStore,
       generalStore: this.generalStore,
@@ -341,5 +341,3 @@ class Metadata implements IMetadata {
     };
   }
 }
-
-export default Metadata;

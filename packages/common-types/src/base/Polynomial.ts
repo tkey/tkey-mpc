@@ -1,18 +1,18 @@
 import BN from "bn.js";
 
 import { BNString, ISerializable, PolynomialID, StringifiedType } from "../baseTypes/commonTypes";
-import { ecCurve } from "../utils";
+import { secp256k1 } from "../utils";
 import { getPubKeyPoint } from "./BNUtils";
-import Point from "./Point";
-import PublicPolynomial from "./PublicPolynomial";
-import Share from "./Share";
+import { Point } from "./Point";
+import { PublicPolynomial } from "./PublicPolynomial";
+import { Share } from "./Share";
 
 // @flow
 export type ShareMap = {
   [x: string]: Share;
 };
 
-class Polynomial implements ISerializable {
+export class Polynomial implements ISerializable {
   polynomial: BN[];
 
   publicPolynomial: PublicPolynomial;
@@ -38,9 +38,9 @@ class Polynomial implements ISerializable {
     for (let i = 1; i < this.polynomial.length; i += 1) {
       const tmp = xi.mul(this.polynomial[i]);
       sum = sum.add(tmp);
-      sum = sum.umod(ecCurve.curve.n);
+      sum = sum.umod(secp256k1.curve.n);
       xi = xi.mul(new BN(tmpX));
-      xi = xi.umod(ecCurve.curve.n);
+      xi = xi.umod(secp256k1.curve.n);
     }
     return sum;
   }
@@ -85,5 +85,3 @@ class Polynomial implements ISerializable {
     };
   }
 }
-
-export default Polynomial;

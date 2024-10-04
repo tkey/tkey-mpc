@@ -1,6 +1,6 @@
 import { ErrorCodes, ITkeyError, TkeyError } from "@tkey-mpc/common-types";
 
-class ShareTransferError extends TkeyError {
+export class ShareTransferError extends TkeyError {
   protected static messages: ErrorCodes = {
     8000: "Custom",
     // Misc
@@ -37,4 +37,3 @@ class ShareTransferError extends TkeyError {
     return ShareTransferError.fromCode(8012, extraMessage);
   }
 }
-export default ShareTransferError;

@@ -1,6 +1,6 @@
 import { throws } from "assert";
 
-import CoreError from "../src/errors";
+import { CoreError } from "../src/errors";
 
 describe("Errors", function () {
   it("#serialize", function () {
@@ -14,6 +14,7 @@ describe("Errors", function () {
       "metadata error thrown"
     );
   });
+
   it("#fromCode", function () {
     throws(
       () => {

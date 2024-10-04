@@ -1,13 +1,13 @@
 import { BNString, DeviceShareDescription, IModule, ITKeyApi, prettyPrintError, ShareStore, StringifiedType } from "@tkey-mpc/common-types";
 import BN from "bn.js";
 
-import WebStorageError from "./errors";
+import { WebStorageError } from "./errors";
 import { canAccessFileStorage, getShareFromFileStorage, storeShareOnFileStorage } from "./FileStorageHelpers";
 import { getShareFromLocalStorage, storeShareOnLocalStorage } from "./LocalStorageHelpers";
 
 export const WEB_STORAGE_MODULE_NAME = "webStorage";
 
-class WebStorageModule implements IModule {
+export class WebStorageModule implements IModule {
   moduleName: string;
 
   tbSDK: ITKeyApi;
@@ -107,5 +107,3 @@ class WebStorageModule implements IModule {
     this.tbSDK.inputShareStore(latestShareStore);
   }
 }
-
-export default WebStorageModule;

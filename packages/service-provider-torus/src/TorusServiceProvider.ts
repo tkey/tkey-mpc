@@ -1,20 +1,19 @@
 import { Point, PointHex, StringifiedType, TorusServiceProviderArgs } from "@tkey-mpc/common-types";
 import { ServiceProviderBase } from "@tkey-mpc/service-provider-base";
 import type { TORUS_SAPPHIRE_NETWORK_TYPE } from "@toruslabs/constants";
-import CustomAuth, {
+import {
   AggregateLoginParams,
+  CustomAuth,
   CustomAuthArgs,
-  HybridAggregateLoginParams,
   InitParams,
   SubVerifierDetails,
   TorusAggregateLoginResponse,
-  TorusHybridAggregateLoginResponse,
   TorusLoginResponse,
 } from "@toruslabs/customauth";
-import Torus, { TorusPublicKey } from "@toruslabs/torus.js";
+import { Torus, TorusPublicKey } from "@toruslabs/torus.js";
 import BN from "bn.js";
 
-class TorusServiceProvider extends ServiceProviderBase {
+export class TorusServiceProvider extends ServiceProviderBase {
   customAuthInstance: CustomAuth;
 
   singleLoginKey: BN;
@@ -173,19 +172,6 @@ class TorusServiceProvider extends ServiceProviderBase {
     return obj;
   }
 
-  async triggerHybridAggregateLogin(params: HybridAggregateLoginParams): Promise<TorusHybridAggregateLoginResponse> {
-    const obj = await this.customAuthInstance.triggerHybridAggregateLogin(params);
-    const aggregateLoginKey = Torus.getPostboxKey(obj.aggregateLogins[0]);
-    const singleLoginKey = Torus.getPostboxKey(obj.singleLogin);
-    this.postboxKey = new BN(aggregateLoginKey, "hex");
-    this.singleLoginKey = new BN(singleLoginKey, "hex");
-    const { verifier, verifierId } = obj.singleLogin.userInfo;
-    this.verifierName = verifier;
-    this.verifierId = verifierId;
-    this.verifierType = "hybrid";
-    return obj;
-  }
-
   toJSON(): StringifiedType {
     return {
       ...super.toJSON(),
@@ -194,5 +180,3 @@ class TorusServiceProvider extends ServiceProviderBase {
     };
   }
 }
-
-export default TorusServiceProvider;

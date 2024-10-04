@@ -1,9 +1,9 @@
 import BN from "bn.js";
 
 import { BNString, ISerializable, StringifiedType } from "../baseTypes/commonTypes";
-import Point from "./Point";
+import { Point } from "./Point";
 
-class PublicShare implements ISerializable {
+export class PublicShare implements ISerializable {
   shareCommitment: Point;
 
   shareIndex: BN;

@@ -2,14 +2,16 @@ import type { TORUS_SAPPHIRE_NETWORK_TYPE } from "@toruslabs/constants";
 import { CustomAuthArgs } from "@toruslabs/customauth";
 import { PointHex } from "@toruslabs/rss-client";
 import BN from "bn.js";
-import type { curve } from "elliptic";
+import type { curve, ec as EC } from "elliptic";
 
-import Point from "../base/Point";
+import type { Point } from "../base/Point";
+
 export type { PointHex } from "@toruslabs/rss-client";
 export { ecPoint, hexPoint, randomSelection, RSSClient } from "@toruslabs/rss-client";
 
 export type PubKeyType = "ecc";
-
+export type EllipticPoint = curve.base.BasePoint;
+export type EllipticCurve = EC;
 // @flow
 export type PolynomialID = string;
 
@@ -144,3 +146,8 @@ export type InitializeNewTSSKeyResult = {
     [factorPubID: string]: FactorEnc;
   };
 };
+
+export enum KeyType {
+  secp256k1 = "secp256k1",
+  ed25519 = "ed25519",
+}

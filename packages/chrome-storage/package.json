@@ -5,8 +5,9 @@
   "author": "Torus Labs",
   "homepage": "https://github.com/tkey/tkey#readme",
   "license": "MIT",
-  "main": "dist/chromeStorage.cjs.js",
-  "module": "dist/chromeStorage.esm.js",
+  "sideEffects": false,
+  "main": "dist/lib.cjs/index.js",
+  "module": "dist/lib.esm/index.js",
   "unpkg": "dist/chromeStorage.umd.min.js",
   "jsdelivr": "dist/chromeStorage.umd.min.js",
   "types": "dist/types/index.d.ts",
@@ -42,11 +43,11 @@
   },
   "dependencies": {
     "@tkey-mpc/common-types": "^9.2.0",
-    "webextension-polyfill": "^0.10.0"
+    "webextension-polyfill": "^0.12.0"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.246",
-    "@types/webextension-polyfill": "^0.10.4"
+    "@types/chrome": "^0.0.276",
+    "@types/webextension-polyfill": "^0.12.1"
   },
   "lint-staged": {
     "!(*d).ts": [

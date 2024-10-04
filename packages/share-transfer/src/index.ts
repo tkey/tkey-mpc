@@ -1,5 +1,4 @@
-export { default as ShareTransferError } from "./errors";
-export { default as ShareRequest } from "./ShareRequest";
-export { default, default as ShareTransferModule } from "./ShareTransferModule";
+export { ShareTransferError } from "./errors";
+export { ShareRequest } from "./ShareRequest";
 export * from "./ShareTransferModule";
-export { default as ShareTransferStorePointer } from "./ShareTransferStorePointer";
+export { ShareTransferStorePointer } from "./ShareTransferStorePointer";

@@ -1,6 +1,6 @@
 import { ErrorCodes, ITkeyError, TkeyError } from "@tkey-mpc/common-types";
 
-class SeedPhraseError extends TkeyError {
+export class SeedPhraseError extends TkeyError {
   protected static messages: ErrorCodes = {
     6000: "Custom",
     // Misc
@@ -33,4 +33,3 @@ class SeedPhraseError extends TkeyError {
     return SeedPhraseError.fromCode(6012, extraMessage);
   }
 }
-export default SeedPhraseError;

@@ -1,9 +1,9 @@
-import { ecCurve, generatePrivateExcludingIndexes, Point, Polynomial, Share } from "@tkey-mpc/common-types";
+import { generatePrivateExcludingIndexes, Point, Polynomial, secp256k1, Share } from "@tkey-mpc/common-types";
 import { generatePrivate } from "@toruslabs/eccrypto";
 import BN from "bn.js";
 import { curve } from "elliptic";
 
-import CoreError from "./errors";
+import { CoreError } from "./errors";
 
 const generateEmptyBNArray = (length: number): BN[] => Array.from({ length }, () => new BN(0));
 
@@ -14,9 +14,9 @@ const denominator = (i: number, innerPoints: Array<Point>) => {
     if (i !== j) {
       let tmp = new BN(xi);
       tmp = tmp.sub(innerPoints[j].x);
-      tmp = tmp.umod(ecCurve.curve.n);
+      tmp = tmp.umod(secp256k1.curve.n);
       result = result.mul(tmp);
-      result = result.umod(ecCurve.curve.n);
+      result = result.umod(secp256k1.curve.n);
     }
   }
   return result;
@@ -28,7 +28,7 @@ const interpolationPoly = (i: number, innerPoints: Array<Point>): BN[] => {
   if (d.cmp(new BN(0)) === 0) {
     throw CoreError.default("Denominator for interpolationPoly is 0");
   }
-  coefficients[0] = d.invm(ecCurve.curve.n);
+  coefficients[0] = d.invm(secp256k1.curve.n);
   for (let k = 0; k < innerPoints.length; k += 1) {
     const newCoefficients = generateEmptyBNArray(innerPoints.length);
     if (k !== i) {
@@ -41,12 +41,12 @@ const interpolationPoly = (i: number, innerPoints: Array<Point>): BN[] => {
       j -= 1;
       for (; j >= 0; j -= 1) {
         newCoefficients[j + 1] = newCoefficients[j + 1].add(coefficients[j]);
-        newCoefficients[j + 1] = newCoefficients[j + 1].umod(ecCurve.curve.n);
+        newCoefficients[j + 1] = newCoefficients[j + 1].umod(secp256k1.curve.n);
         let tmp = new BN(innerPoints[k].x);
         tmp = tmp.mul(coefficients[j]);
-        tmp = tmp.umod(ecCurve.curve.n);
+        tmp = tmp.umod(secp256k1.curve.n);
         newCoefficients[j] = newCoefficients[j].sub(tmp);
-        newCoefficients[j] = newCoefficients[j].umod(ecCurve.curve.n);
+        newCoefficients[j] = newCoefficients[j].umod(secp256k1.curve.n);
       }
       coefficients = newCoefficients;
     }
@@ -69,7 +69,7 @@ const lagrange = (unsortedPoints: Point[]) => {
       let tmp = new BN(sortedPoints[i].y);
       tmp = tmp.mul(coefficients[k]);
       polynomial[k] = polynomial[k].add(tmp);
-      polynomial[k] = polynomial[k].umod(ecCurve.curve.n);
+      polynomial[k] = polynomial[k].umod(secp256k1.curve.n);
     }
   }
   return new Polynomial(polynomial);
@@ -90,17 +90,17 @@ export function lagrangeInterpolation(shares: BN[], nodeIndex: BN[]): BN {
     for (let j = 0; j < shares.length; j += 1) {
       if (i !== j) {
         upper = upper.mul(nodeIndex[j].neg());
-        upper = upper.umod(ecCurve.curve.n);
+        upper = upper.umod(secp256k1.curve.n);
         let temp = nodeIndex[i].sub(nodeIndex[j]);
-        temp = temp.umod(ecCurve.curve.n);
-        lower = lower.mul(temp).umod(ecCurve.curve.n);
+        temp = temp.umod(secp256k1.curve.n);
+        lower = lower.mul(temp).umod(secp256k1.curve.n);
       }
     }
-    let delta = upper.mul(lower.invm(ecCurve.curve.n)).umod(ecCurve.curve.n);
-    delta = delta.mul(shares[i]).umod(ecCurve.curve.n);
+    let delta = upper.mul(lower.invm(secp256k1.curve.n)).umod(secp256k1.curve.n);
+    delta = delta.mul(shares[i]).umod(secp256k1.curve.n);
     secret = secret.add(delta);
   }
-  return secret.umod(ecCurve.curve.n);
+  return secret.umod(secp256k1.curve.n);
 }
 
 // generateRandomPolynomial - determinisiticShares are assumed random
@@ -144,12 +144,12 @@ export function polyCommitmentEval(polyCommitments: Array<Point>, index: BN): Po
   // convert to base points, this is badly written, its the only way to access the point rn zzz TODO: refactor
   const basePtPolyCommitments: Array<curve.base.BasePoint> = [];
   for (let i = 0; i < polyCommitments.length; i += 1) {
-    const key = ecCurve.keyFromPublic({ x: polyCommitments[i].x.toString("hex"), y: polyCommitments[i].y.toString("hex") }, "");
+    const key = secp256k1.keyFromPublic({ x: polyCommitments[i].x.toString("hex"), y: polyCommitments[i].y.toString("hex") }, "");
     basePtPolyCommitments.push(key.getPublic());
   }
   let shareCommitment = basePtPolyCommitments[0];
   for (let i = 1; i < basePtPolyCommitments.length; i += 1) {
-    const factor = index.pow(new BN(i)).umod(ecCurve.n);
+    const factor = index.pow(new BN(i)).umod(secp256k1.n);
     const e = basePtPolyCommitments[i].mul(factor);
     shareCommitment = shareCommitment.add(e);
   }
@@ -209,13 +209,13 @@ export function getLagrangeCoeffs(_allIndexes: number[], _myIndex: number, _targ
   for (let j = 0; j < allIndexes.length; j += 1) {
     if (myIndex.cmp(allIndexes[j]) !== 0) {
       let tempUpper = target.sub(allIndexes[j]);
-      tempUpper = tempUpper.umod(ecCurve.curve.n);
+      tempUpper = tempUpper.umod(secp256k1.curve.n);
       upper = upper.mul(tempUpper);
-      upper = upper.umod(ecCurve.curve.n);
+      upper = upper.umod(secp256k1.curve.n);
       let tempLower = myIndex.sub(allIndexes[j]);
-      tempLower = tempLower.umod(ecCurve.curve.n);
-      lower = lower.mul(tempLower).umod(ecCurve.curve.n);
+      tempLower = tempLower.umod(secp256k1.curve.n);
+      lower = lower.mul(tempLower).umod(secp256k1.curve.n);
     }
   }
-  return upper.mul(lower.invm(ecCurve.curve.n)).umod(ecCurve.curve.n);
+  return upper.mul(lower.invm(secp256k1.curve.n)).umod(secp256k1.curve.n);
 }

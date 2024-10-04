@@ -19,6 +19,7 @@ describe("lagrangeInterpolatePolynomial", function () {
       fail("poly result should equal hardcoded poly");
     }
   });
+
   it("#should interpolate random poly correctly", async function () {
     const degree = Math.floor(Math.random() * (50 - 1)) + 1;
     const poly = generateRandomPolynomial(degree);

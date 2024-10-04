@@ -1,6 +1,6 @@
 import { ShareStore } from "@tkey-mpc/common-types";
 
-import WebStorageError from "./errors";
+import { WebStorageError } from "./errors";
 import { getWindow } from "./utils";
 
 function storageAvailable(type: string): boolean {

@@ -34,6 +34,7 @@ describe("Metadata", function () {
     const deserializedMetadata2 = Metadata.fromJSON(JSON.parse(secondSerialization));
     deepStrictEqual(deserializedMetadata2, deserializedMetadata, "metadata and deserializedMetadata should be equal");
   });
+
   it("#should serialize and deserialize into JSON with tkey store seamlessly", async function () {
     const privKey = PRIVATE_KEY;
     const privKeyBN = new BN(privKey, 16);
@@ -58,6 +59,7 @@ describe("Metadata", function () {
     const deserializedMetadata2 = Metadata.fromJSON(JSON.parse(secondSerialization));
     deepStrictEqual(deserializedMetadata2, deserializedMetadata, "metadata and deserializedMetadata should be equal");
   });
+
   it("#should serialize and deserialize into JSON with tkey store seamlessly 2", async function () {
     const privKey = PRIVATE_KEY;
     const privKeyBN = new BN(privKey, 16);

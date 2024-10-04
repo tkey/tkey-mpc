@@ -1,12 +1,12 @@
-import { ecCurve, IAuthMetadata, StringifiedType, stripHexPrefix, toPrivKeyEC } from "@tkey-mpc/common-types";
+import { IAuthMetadata, secp256k1, StringifiedType, stripHexPrefix, toPrivKeyEC } from "@tkey-mpc/common-types";
 import { keccak256 } from "@toruslabs/torus.js";
 import BN from "bn.js";
 import stringify from "json-stable-stringify";
 
-import CoreError from "./errors";
-import Metadata from "./metadata";
+import { CoreError } from "./errors";
+import { Metadata } from "./metadata";
 
-class AuthMetadata implements IAuthMetadata {
+export class AuthMetadata implements IAuthMetadata {
   metadata: Metadata;
 
   privKey: BN;
@@ -22,7 +22,7 @@ class AuthMetadata implements IAuthMetadata {
     const m = Metadata.fromJSON(data);
     if (!m.pubKey) throw CoreError.metadataPubKeyUnavailable();
 
-    const pubK = ecCurve.keyFromPublic({ x: m.pubKey.x.toString("hex", 64), y: m.pubKey.y.toString("hex", 64) }, "hex");
+    const pubK = secp256k1.keyFromPublic({ x: m.pubKey.x.toString("hex", 64), y: m.pubKey.y.toString("hex", 64) }, "hex");
     if (!pubK.verify(stripHexPrefix(keccak256(Buffer.from(stringify(data), "utf8"))), sig)) {
       throw CoreError.default("Signature not valid for returning metadata");
     }
@@ -42,5 +42,3 @@ class AuthMetadata implements IAuthMetadata {
     };
   }
 }
-
-export default AuthMetadata;

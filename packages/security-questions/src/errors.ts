@@ -1,6 +1,6 @@
 import { ErrorCodes, ITkeyError, TkeyError } from "@tkey-mpc/common-types";
 
-class SecurityQuestionsError extends TkeyError {
+export class SecurityQuestionsError extends TkeyError {
   protected static messages: ErrorCodes = {
     2101: "security questions might not exist/be setup",
     2102: "security questions exists, cant replace, maybe change?",
@@ -37,4 +37,3 @@ class SecurityQuestionsError extends TkeyError {
     return SecurityQuestionsError.fromCode(2104, extraMessage);
   }
 }
-export default SecurityQuestionsError;

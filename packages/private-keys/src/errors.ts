@@ -1,6 +1,6 @@
 import { ErrorCodes, ITkeyError, TkeyError } from "@tkey-mpc/common-types";
 
-class PrivateKeysError extends TkeyError {
+export class PrivateKeysError extends TkeyError {
   protected static messages: ErrorCodes = {
     5000: "Custom",
     // Misc
@@ -34,4 +34,3 @@ class PrivateKeysError extends TkeyError {
     return PrivateKeysError.fromCode(5012, extraMessage);
   }
 }
-export default PrivateKeysError;

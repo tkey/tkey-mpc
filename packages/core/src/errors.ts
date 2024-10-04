@@ -19,7 +19,7 @@ import { ErrorCodes, ITkeyError, TkeyError } from "@tkey-mpc/common-types";
  * 7000 - share serialization
  * 8000 - share transfer
  */
-class CoreError extends TkeyError {
+export class CoreError extends TkeyError {
   protected static messages: ErrorCodes = {
     1000: "Custom",
     // Misc
@@ -151,4 +151,3 @@ class CoreError extends TkeyError {
     return CoreError.fromCode(1504, extraMessage);
   }
 }
-export default CoreError;

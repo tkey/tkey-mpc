@@ -1,6 +1,6 @@
 import { ErrorCodes, ITkeyError, TkeyError } from "@tkey-mpc/common-types";
 
-class ShareSerializationError extends TkeyError {
+export class ShareSerializationError extends TkeyError {
   protected static messages: ErrorCodes = {
     7000: "Custom",
     // Misc
@@ -42,4 +42,3 @@ class ShareSerializationError extends TkeyError {
     return ShareSerializationError.fromCode(7013, extraMessage);
   }
 }
-export default ShareSerializationError;

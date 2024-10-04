@@ -23,6 +23,7 @@ describe("polyCommitmentEval", function () {
       fail("expected share commitment2 should equal share commitment");
     }
   });
+
   it("#should polyCommitmentEval random poly correctly", async function () {
     const degree = Math.floor(Math.random() * (50 - 1)) + 1;
     const poly = generateRandomPolynomial(degree);

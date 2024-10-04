@@ -1,11 +1,11 @@
 import { IModule, IPrivateKeyFormat, IPrivateKeyStore, ITKeyApi } from "@tkey-mpc/common-types";
 import BN from "bn.js";
 
-import PrivateKeysError from "./errors";
+import { PrivateKeysError } from "./errors";
 
 export const PRIVATE_KEY_MODULE_NAME = "privateKeyModule";
 
-class PrivateKeyModule implements IModule {
+export class PrivateKeyModule implements IModule {
   moduleName: string;
 
   tbSDK: ITKeyApi;

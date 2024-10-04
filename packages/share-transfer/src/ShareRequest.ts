@@ -1,6 +1,6 @@
 import { BufferObj, EncryptedMessage, ShareRequestArgs } from "@tkey-mpc/common-types";
 
-class ShareRequest {
+export class ShareRequest {
   encPubKey: Buffer;
 
   encShareInTransit: EncryptedMessage;
@@ -29,5 +29,3 @@ class ShareRequest {
     this.timestamp = timestamp;
   }
 }
-
-export default ShareRequest;

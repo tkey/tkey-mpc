@@ -1,3 +1,3 @@
-export { default as SeedPhraseError } from "./errors";
-export { default as MetamaskSeedPhraseFormat } from "./MetamaskSeedPhraseFormat";
-export { default, SEED_PHRASE_MODULE_NAME, default as SeedPhraseModule } from "./SeedPhrase";
+export { SeedPhraseError } from "./errors";
+export { MetamaskSeedPhraseFormat } from "./MetamaskSeedPhraseFormat";
+export { SEED_PHRASE_MODULE_NAME, SeedPhraseModule } from "./SeedPhrase";

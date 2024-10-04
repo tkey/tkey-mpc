@@ -1,5 +1,5 @@
-export { default as AuthMetadata } from "./authMetadata";
-export { default } from "./core";
-export { default as CoreError } from "./errors";
+export { AuthMetadata } from "./authMetadata";
+export * from "./core";
+export { CoreError } from "./errors";
 export * from "./lagrangeInterpolatePolynomial";
-export { default as Metadata } from "./metadata";
+export { Metadata } from "./metadata";

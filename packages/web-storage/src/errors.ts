@@ -1,6 +1,6 @@
 import { ErrorCodes, ITkeyError, TkeyError } from "@tkey-mpc/common-types";
 
-class WebStorageError extends TkeyError {
+export class WebStorageError extends TkeyError {
   protected static messages: ErrorCodes = {
     3000: "default",
     // module
@@ -49,4 +49,3 @@ class WebStorageError extends TkeyError {
     return WebStorageError.fromCode(3302, extraMessage);
   }
 }
-export default WebStorageError;

@@ -3,7 +3,7 @@ import { generateID, ISeedPhraseFormat, ISeedPhraseStore, MetamaskSeedPhraseStor
 import BN from "bn.js";
 import { HDNodeWallet, Mnemonic, Provider, randomBytes } from "ethers";
 
-class MetamaskSeedPhraseFormat implements ISeedPhraseFormat {
+export class MetamaskSeedPhraseFormat implements ISeedPhraseFormat {
   type: string;
 
   provider: Provider;
@@ -62,4 +62,3 @@ class MetamaskSeedPhraseFormat implements ISeedPhraseFormat {
     return obj;
   }
 }
-export default MetamaskSeedPhraseFormat;

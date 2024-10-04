@@ -1,7 +1,7 @@
 import { ISerializable, PolynomialID, StringifiedType } from "../baseTypes/commonTypes";
-import Share from "./Share";
+import { Share } from "./Share";
 
-class ShareStore implements ISerializable {
+export class ShareStore implements ISerializable {
   share: Share;
 
   polynomialID: PolynomialID;
