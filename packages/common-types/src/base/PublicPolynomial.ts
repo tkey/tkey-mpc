@@ -1,7 +1,7 @@
 import { ISerializable, PolynomialID, StringifiedType } from "../baseTypes/commonTypes";
-import Point from "./Point";
+import { Point } from "./Point";
 
-class PublicPolynomial implements ISerializable {
+export class PublicPolynomial implements ISerializable {
   polynomialCommitments: Point[];
 
   polynomialId: PolynomialID;
@@ -43,5 +43,3 @@ class PublicPolynomial implements ISerializable {
 export type PublicPolynomialMap = {
   [polynomialID: string]: PublicPolynomial;
 };
-
-export default PublicPolynomial;

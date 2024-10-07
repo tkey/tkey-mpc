@@ -1,6 +1,6 @@
 import { sha256 } from "ethereum-cryptography/sha256";
 
-import ShareSerializationError from "./errors";
+import { ShareSerializationError } from "./errors";
 
 export function normalize(str?: string): string {
   return (str || "").normalize("NFKD");

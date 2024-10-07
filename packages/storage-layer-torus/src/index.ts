@@ -1,2 +1,2 @@
-export { default as MockStorageLayer } from "./MockStorageLayer";
-export { default, default as TorusStorageLayer } from "./TorusStorageLayer";
+export { MockStorageLayer } from "./MockStorageLayer";
+export { TorusStorageLayer } from "./TorusStorageLayer";

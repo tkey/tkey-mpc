@@ -5,8 +5,9 @@
   "author": "Torus Labs",
   "homepage": "https://github.com/tkey/tkey#readme",
   "license": "MIT",
-  "main": "dist/webStorage.cjs.js",
-  "module": "dist/webStorage.esm.js",
+  "sideEffects": false,
+  "main": "dist/lib.cjs/index.js",
+  "module": "dist/lib.esm/index.js",
   "unpkg": "dist/webStorage.umd.min.js",
   "jsdelivr": "dist/webStorage.umd.min.js",
   "types": "dist/types/index.d.ts",
@@ -50,7 +51,7 @@
     "@tkey-mpc/core": "^9.2.2",
     "@tkey-mpc/service-provider-base": "^9.2.0",
     "@tkey-mpc/storage-layer-torus": "^9.2.1",
-    "@types/filesystem": "^0.0.33"
+    "@types/filesystem": "^0.0.36"
   },
   "bugs": {
     "url": "https://github.com/tkey/tkey/issues"

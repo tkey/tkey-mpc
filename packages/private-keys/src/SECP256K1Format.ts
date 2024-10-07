@@ -1,15 +1,15 @@
-import { ecCurve, generateID, IPrivateKeyFormat, IPrivateKeyStore } from "@tkey-mpc/common-types";
+import { generateID, IPrivateKeyFormat, IPrivateKeyStore, secp256k1 } from "@tkey-mpc/common-types";
 import BN from "bn.js";
-import nodeCrypto from "crypto";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const browserCrypto = global.crypto || (global as any).msCrypto || {};
 
 export function randomBytes(size: number): Buffer {
-  const arr = new Uint8Array(size);
   if (typeof browserCrypto.getRandomValues === "undefined") {
-    return Buffer.from(nodeCrypto.randomBytes(size));
+    return Buffer.from(browserCrypto.randomBytes(size));
   }
+
+  const arr = new Uint8Array(size);
   browserCrypto.getRandomValues(arr);
 
   return Buffer.from(arr);
@@ -25,7 +25,7 @@ export class SECP256K1Format implements IPrivateKeyFormat {
 
   constructor(privateKey: BN) {
     this.privateKey = privateKey;
-    this.ecParams = ecCurve.curve;
+    this.ecParams = secp256k1.curve;
     this.type = "secp256k1n";
   }
 

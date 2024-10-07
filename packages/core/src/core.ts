@@ -3,7 +3,6 @@ import {
   CatchupToLatestShareResult,
   decrypt,
   DeleteShareResult,
-  ecCurve,
   ecPoint,
   encrypt,
   EncryptedMessage,
@@ -41,6 +40,7 @@ import {
   RefreshMiddlewareMap,
   RefreshSharesResult,
   RSSClient,
+  secp256k1,
   Share,
   SHARE_DELETED,
   ShareSerializationMiddleware,
@@ -57,8 +57,8 @@ import { keccak256 } from "@toruslabs/torus.js";
 import BN from "bn.js";
 import stringify from "json-stable-stringify";
 
-import AuthMetadata from "./authMetadata";
-import CoreError from "./errors";
+import { AuthMetadata } from "./authMetadata";
+import { CoreError } from "./errors";
 import {
   dotProduct,
   generateRandomPolynomial,
@@ -67,12 +67,13 @@ import {
   lagrangeInterpolatePolynomial,
   lagrangeInterpolation,
 } from "./lagrangeInterpolatePolynomial";
-import Metadata from "./metadata";
+import { Metadata } from "./metadata";
+import { pointToHex } from "./utils";
 // TODO: handle errors for get and set with retries
 export const TSS_MODULE = "tssModule";
 export const ACCOUNTSALT = "accountSalt";
 
-class ThresholdKey implements ITKey {
+export class ThresholdKey implements ITKey {
   modules: ModuleMap;
 
   enableLogging: boolean;
@@ -423,9 +424,9 @@ class ThresholdKey implements ITKey {
 
     const { threshold, accountIndex } = opts || {};
     if (type === "direct") {
-      const tssSharePub = ecCurve.g.mul(userDec);
-      const tssCommitA0 = ecCurve.keyFromPublic({ x: tssCommits[0].x.toString(16, 64), y: tssCommits[0].y.toString(16, 64) }).getPublic();
-      const tssCommitA1 = ecCurve.keyFromPublic({ x: tssCommits[1].x.toString(16, 64), y: tssCommits[1].y.toString(16, 64) }).getPublic();
+      const tssSharePub = secp256k1.g.mul(userDec);
+      const tssCommitA0 = secp256k1.keyFromPublic({ x: tssCommits[0].x.toString(16, 64), y: tssCommits[0].y.toString(16, 64) }).getPublic();
+      const tssCommitA1 = secp256k1.keyFromPublic({ x: tssCommits[1].x.toString(16, 64), y: tssCommits[1].y.toString(16, 64) }).getPublic();
       let _tssSharePub = tssCommitA0;
       for (let j = 0; j < tssIndex; j++) {
         _tssSharePub = _tssSharePub.add(tssCommitA1);
@@ -433,7 +434,7 @@ class ThresholdKey implements ITKey {
       if (tssSharePub.getX().cmp(_tssSharePub.getX()) === 0 && tssSharePub.getY().cmp(_tssSharePub.getY()) === 0) {
         if (accountIndex && accountIndex > 0) {
           const nonce = this.computeAccountNonce(accountIndex);
-          const derivedShare = userDec.add(nonce).umod(ecCurve.n);
+          const derivedShare = userDec.add(nonce).umod(secp256k1.n);
           return { tssIndex, tssShare: derivedShare };
         }
         return { tssIndex, tssShare: userDec };
@@ -453,12 +454,12 @@ class ThresholdKey implements ITKey {
 
       const selectedServerIndexes = serverIndexes.filter((_, j) => combi.indexOf(j) > -1);
       const serverLagrangeCoeffs = selectedServerIndexes.map((x) => getLagrangeCoeffs(selectedServerIndexes, x));
-      const serverInterpolated = dotProduct(serverLagrangeCoeffs, selectedServerDecs, ecCurve.n);
+      const serverInterpolated = dotProduct(serverLagrangeCoeffs, selectedServerDecs, secp256k1.n);
       const lagrangeCoeffs = [getLagrangeCoeffs([1, 99], 1), getLagrangeCoeffs([1, 99], 99)];
-      const tssShare = dotProduct(lagrangeCoeffs, [serverInterpolated, userDec], ecCurve.n);
-      const tssSharePub = ecCurve.g.mul(tssShare);
-      const tssCommitA0 = ecCurve.keyFromPublic({ x: tssCommits[0].x.toString(16, 64), y: tssCommits[0].y.toString(16, 64) }).getPublic();
-      const tssCommitA1 = ecCurve.keyFromPublic({ x: tssCommits[1].x.toString(16, 64), y: tssCommits[1].y.toString(16, 64) }).getPublic();
+      const tssShare = dotProduct(lagrangeCoeffs, [serverInterpolated, userDec], secp256k1.n);
+      const tssSharePub = secp256k1.g.mul(tssShare);
+      const tssCommitA0 = secp256k1.keyFromPublic({ x: tssCommits[0].x.toString(16, 64), y: tssCommits[0].y.toString(16, 64) }).getPublic();
+      const tssCommitA1 = secp256k1.keyFromPublic({ x: tssCommits[1].x.toString(16, 64), y: tssCommits[1].y.toString(16, 64) }).getPublic();
       let _tssSharePub = tssCommitA0;
       for (let j = 0; j < tssIndex; j++) {
         _tssSharePub = _tssSharePub.add(tssCommitA1);
@@ -466,7 +467,7 @@ class ThresholdKey implements ITKey {
       if (tssSharePub.getX().cmp(_tssSharePub.getX()) === 0 && tssSharePub.getY().cmp(_tssSharePub.getY()) === 0) {
         if (accountIndex && accountIndex > 0) {
           const nonce = this.computeAccountNonce(accountIndex);
-          const derivedShare = tssShare.add(nonce).umod(ecCurve.n);
+          const derivedShare = tssShare.add(nonce).umod(secp256k1.n);
           return { tssIndex, tssShare: derivedShare };
         }
         return { tssIndex, tssShare };
@@ -489,8 +490,8 @@ class ThresholdKey implements ITKey {
     if (accountIndex && accountIndex > 0) {
       const nonce = this.computeAccountNonce(accountIndex);
       // we need to add the pub key nonce to the tssPub
-      const noncePub = ecCurve.keyFromPrivate(nonce.toString("hex")).getPublic();
-      const pubKeyPoint = ecCurve.keyFromPublic({ x: tssCommits[0].x.toString("hex"), y: tssCommits[0].y.toString("hex") }).getPublic();
+      const noncePub = secp256k1.keyFromPrivate(nonce.toString("hex")).getPublic();
+      const pubKeyPoint = secp256k1.keyFromPublic({ x: tssCommits[0].x.toString("hex"), y: tssCommits[0].y.toString("hex") }).getPublic();
       const devicePubKeyPoint = pubKeyPoint.add(noncePub);
       return new Point(devicePubKeyPoint.getX().toString("hex"), devicePubKeyPoint.getY().toString("hex"));
     }
@@ -583,7 +584,7 @@ class ThresholdKey implements ITKey {
               if (latestShareRes.latestShare.polynomialID === pubPolyID) {
                 sharesToInput.push(latestShareRes.latestShare);
               } else {
-                throw new CoreError(1304, "Share found in unexpected polynomial"); // Share found in unexpected polynomial
+                throw CoreError.fromCode(1304, "Share found in unexpected polynomial"); // Share found in unexpected polynomial
               }
             }
             delete shareIndexesRequired[shareIndexesForPoly[k]];
@@ -703,7 +704,7 @@ class ThresholdKey implements ITKey {
     const shareIndexToDelete = new BN(shareIndex, "hex");
     const shareToDelete = this.outputShareStore(shareIndexToDelete);
     if (shareIndexToDelete.cmp(new BN("1", "hex")) === 0) {
-      throw new CoreError(1001, "Unable to delete service provider share");
+      throw CoreError.fromCode(1001, "Unable to delete service provider share");
     }
 
     // Get existing shares
@@ -887,7 +888,7 @@ class ThresholdKey implements ITKey {
       const newTssNonce: number = existingNonce && existingNonce > 0 ? existingNonce + 1 : 0;
       const verifierAndVerifierID = this.serviceProvider.getVerifierNameVerifierId();
       const label = `${verifierAndVerifierID}\u0015${this.tssTag}\u0016${newTssNonce}`;
-      const tssPubKey = hexPoint(ecCurve.g.mul(importKey));
+      const tssPubKey = hexPoint(secp256k1.g.mul(importKey));
       const rssNodeDetails = await this._getRssNodeDetails();
       const { pubKey: newTSSServerPub, nodeIndexes } = await this.getServerTssPubAndIndexes(this.tssTag, newTssNonce);
       let finalSelectedServers = selectedServers;
@@ -912,18 +913,19 @@ class ThresholdKey implements ITKey {
         serverPubKeys,
         serverThreshold,
         tssPubKey,
+        keyType: "secp256k1",
       });
 
       const refreshResponses = await rssClient.import({
         importKey,
-        dkgNewPub: hexPoint(newTSSServerPub),
+        dkgNewPub: pointToHex(newTSSServerPub),
         selectedServers: finalSelectedServers,
-        factorPubs: factorPubs.map((f) => hexPoint(f)),
+        factorPubs: factorPubs.map((f) => pointToHex(f)),
         targetIndexes: tssIndexes,
         newLabel: label,
         sigs: authSignatures,
       });
-      const secondCommit = ecPoint(hexPoint(newTSSServerPub)).add(ecPoint(tssPubKey).neg());
+      const secondCommit = newTSSServerPub.toEllipticPoint(secp256k1).add(ecPoint(secp256k1, tssPubKey).neg());
       const newTSSCommits = [
         Point.fromJSON(tssPubKey),
         Point.fromJSON({ x: secondCommit.getX().toString(16, 64), y: secondCommit.getY().toString(16, 64) }),
@@ -1101,7 +1103,7 @@ class ThresholdKey implements ITKey {
     if (!tssCommits) throw CoreError.default(`tss commits not found for tssTag ${this.tssTag}`);
     if (tssCommits.length === 0) throw CoreError.default(`tssCommits is empty`);
     const tssPubKeyPoint = tssCommits[0];
-    const tssPubKey = hexPoint(tssPubKeyPoint);
+    const tssPubKey = pointToHex(tssPubKeyPoint);
     const { serverEndpoints, serverPubKeys, serverThreshold, selectedServers, authSignatures } = serverOpts;
 
     const rssClient = new RSSClient({
@@ -1109,6 +1111,7 @@ class ThresholdKey implements ITKey {
       serverPubKeys,
       serverThreshold,
       tssPubKey,
+      keyType: "secp256k1",
     });
 
     if (!this.metadata.factorPubs) throw CoreError.default(`factorPubs obj not found`);
@@ -1128,18 +1131,18 @@ class ThresholdKey implements ITKey {
       finalSelectedServers = nodeIndexes.slice(0, Math.min(selectedServers.length, nodeIndexes.length));
     }
     const refreshResponses = await rssClient.refresh({
-      factorPubs: factorPubs.map((f) => hexPoint(f)),
+      factorPubs: factorPubs.map((f) => pointToHex(f)),
       targetIndexes,
       oldLabel,
       newLabel,
       sigs: authSignatures,
-      dkgNewPub: hexPoint(newTSSServerPub),
+      dkgNewPub: pointToHex(newTSSServerPub),
       inputShare,
       inputIndex,
       selectedServers: finalSelectedServers,
     });
 
-    const secondCommit = ecPoint(hexPoint(newTSSServerPub)).add(ecPoint(tssPubKey).neg());
+    const secondCommit = newTSSServerPub.toEllipticPoint(secp256k1).add(ecPoint(secp256k1, tssPubKey).neg());
     const newTSSCommits = [
       Point.fromJSON(tssPubKey),
       Point.fromJSON({ x: secondCommit.getX().toString(16, 64), y: secondCommit.getY().toString(16, 64) }),
@@ -1285,12 +1288,12 @@ class ThresholdKey implements ITKey {
       tss2 = new BN(generatePrivate());
     }
     const { pubKey: tss1Pub } = await this.getServerTssPubAndIndexes(tssTag, 0);
-    const tss1PubKey = ecCurve.keyFromPublic({ x: tss1Pub.x.toString(16, 64), y: tss1Pub.y.toString(16, 64) }).getPublic();
+    const tss1PubKey = secp256k1.keyFromPublic({ x: tss1Pub.x.toString(16, 64), y: tss1Pub.y.toString(16, 64) }).getPublic();
     const tss2Pub = getPubKeyPoint(tss2);
-    const tss2PubKey = ecCurve.keyFromPublic({ x: tss2Pub.x.toString(16, 64), y: tss2Pub.y.toString(16, 64) }).getPublic();
+    const tss2PubKey = secp256k1.keyFromPublic({ x: tss2Pub.x.toString(16, 64), y: tss2Pub.y.toString(16, 64) }).getPublic();
 
     const L1_0 = getLagrangeCoeffs([1, _tssIndex], 1, 0);
-    // eslint-disable-next-line camelcase
+
     const LIndex_0 = getLagrangeCoeffs([1, _tssIndex], _tssIndex, 0);
 
     const a0Pub = tss1PubKey.mul(L1_0).add(tss2PubKey.mul(LIndex_0));
@@ -1442,7 +1445,8 @@ class ThresholdKey implements ITKey {
       this._localMetadataTransitions = [[], []];
       this.lastFetchedCloudMetadata = this.metadata.clone();
     } catch (error: unknown) {
-      throw CoreError.metadataPostFailed(prettyPrintError(error as Error));
+      const prettyError = await prettyPrintError(error);
+      throw CoreError.metadataPostFailed(prettyError.message);
     } finally {
       // release lock
       if (acquiredLock) await this.releaseWriteMetadataLock();
@@ -1564,7 +1568,7 @@ class ThresholdKey implements ITKey {
       polyIDToSearch = this.metadata.getLatestPublicPolynomial().getPolynomialID();
     }
     if (!this.metadata.getShareIndexesForPolynomial(polyIDToSearch).includes(shareIndexParsed.toString("hex"))) {
-      throw new CoreError(1002, "no such share index created");
+      throw CoreError.fromCode(1002, "no such share index created");
     }
     const shareFromStore = this.shares[polyIDToSearch][shareIndexParsed.toString("hex")];
     if (shareFromStore) return shareFromStore;
@@ -2014,7 +2018,7 @@ class ThresholdKey implements ITKey {
     }
     let accountHash = keccak256(Buffer.from(`${index}${this._accountSalt}`));
     if (accountHash.length === 66) accountHash = accountHash.slice(2);
-    return index && index > 0 ? new BN(accountHash, "hex").umod(ecCurve.curve.n) : new BN(0);
+    return index && index > 0 ? new BN(accountHash, "hex").umod(secp256k1.curve.n) : new BN(0);
   }
 
   getApi(): ITKeyApi {
@@ -2053,5 +2057,3 @@ class ThresholdKey implements ITKey {
     return Promise.all(Object.keys(this.modules).map((x) => this.modules[x].initialize()));
   }
 }
-
-export default ThresholdKey;

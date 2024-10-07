@@ -1,10 +1,10 @@
 import {
-  ecCurve,
   GenerateNewShareResult,
   IModule,
   isEmptyObject,
   ISQAnswerStore,
   ITKeyApi,
+  secp256k1,
   SecurityQuestionStoreArgs,
   Share,
   ShareStore,
@@ -13,8 +13,8 @@ import {
 import BN from "bn.js";
 import { keccak256 } from "ethereum-cryptography/keccak";
 
-import SecurityQuestionsError from "./errors";
-import SecurityQuestionStore from "./SecurityQuestionStore";
+import { SecurityQuestionsError } from "./errors";
+import { SecurityQuestionStore } from "./SecurityQuestionStore";
 
 function answerToUserInputHashBN(answerString: string): BN {
   return new BN(keccak256(Buffer.from(answerString, "utf8")));
@@ -23,7 +23,7 @@ function answerToUserInputHashBN(answerString: string): BN {
 export const SECURITY_QUESTIONS_MODULE_NAME = "securityQuestions";
 const TKEYSTORE_ID = "answer";
 
-class SecurityQuestionsModule implements IModule {
+export class SecurityQuestionsModule implements IModule {
   moduleName: string;
 
   tbSDK: ITKeyApi;
@@ -46,7 +46,7 @@ class SecurityQuestionsModule implements IModule {
     if (oldShareStores[sqIndex] && newShareStores[sqIndex]) {
       const sqAnswer = oldShareStores[sqIndex].share.share.sub(sqStore.nonce);
       let newNonce = newShareStores[sqIndex].share.share.sub(sqAnswer);
-      newNonce = newNonce.umod(ecCurve.curve.n);
+      newNonce = newNonce.umod(secp256k1.curve.n);
 
       return new SecurityQuestionStore({
         nonce: newNonce,
@@ -76,7 +76,7 @@ class SecurityQuestionsModule implements IModule {
     const newShareStore = newSharesDetails.newShareStores[newSharesDetails.newShareIndex.toString("hex")];
     const userInputHash = answerToUserInputHashBN(answerString);
     let nonce = newShareStore.share.share.sub(userInputHash);
-    nonce = nonce.umod(ecCurve.curve.n);
+    nonce = nonce.umod(secp256k1.curve.n);
     const sqStore = new SecurityQuestionStore({
       nonce,
       questions,
@@ -111,7 +111,7 @@ class SecurityQuestionsModule implements IModule {
     const sqStore = new SecurityQuestionStore(rawSqStore as SecurityQuestionStoreArgs);
     const userInputHash = answerToUserInputHashBN(answerString);
     let share = sqStore.nonce.add(userInputHash);
-    share = share.umod(ecCurve.curve.n);
+    share = share.umod(secp256k1.curve.n);
     const shareStore = new ShareStore(new Share(sqStore.shareIndex, share), sqStore.polynomialID);
     // validate if share is correct
     const derivedPublicShare = shareStore.share.getPublicShare();
@@ -135,7 +135,7 @@ class SecurityQuestionsModule implements IModule {
     const userInputHash = answerToUserInputHashBN(newAnswerString);
     const sqShare = this.tbSDK.outputShareStore(sqStore.shareIndex);
     let nonce = sqShare.share.share.sub(userInputHash);
-    nonce = nonce.umod(ecCurve.curve.n);
+    nonce = nonce.umod(secp256k1.curve.n);
 
     const newSqStore = new SecurityQuestionStore({
       nonce,
@@ -168,5 +168,3 @@ class SecurityQuestionsModule implements IModule {
     throw SecurityQuestionsError.noPasswordSaved();
   }
 }
-
-export default SecurityQuestionsModule;

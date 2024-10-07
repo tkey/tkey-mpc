@@ -2,9 +2,9 @@ import BN from "bn.js";
 
 import { BNString, ISerializable, StringifiedType } from "../baseTypes/commonTypes";
 import { getPubKeyPoint } from "./BNUtils";
-import PublicShare from "./PublicShare";
+import { PublicShare } from "./PublicShare";
 
-class Share implements ISerializable {
+export class Share implements ISerializable {
   share: BN;
 
   shareIndex: BN;
@@ -30,5 +30,3 @@ class Share implements ISerializable {
     };
   }
 }
-
-export default Share;

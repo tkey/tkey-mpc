@@ -1,11 +1,11 @@
 import { IModule, ISeedPhraseFormat, ISeedPhraseStore, ISeedPhraseStoreWithKeys, ITKeyApi } from "@tkey-mpc/common-types";
 import BN from "bn.js";
 
-import SeedPhraseError from "./errors";
+import { SeedPhraseError } from "./errors";
 
 export const SEED_PHRASE_MODULE_NAME = "seedPhraseModule";
 
-class SeedPhraseModule implements IModule {
+export class SeedPhraseModule implements IModule {
   moduleName: string;
 
   tbSDK: ITKeyApi;
@@ -88,5 +88,3 @@ class SeedPhraseModule implements IModule {
     }
   }
 }
-
-export default SeedPhraseModule;

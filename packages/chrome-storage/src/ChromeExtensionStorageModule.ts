@@ -3,7 +3,7 @@ import { storage } from "webextension-polyfill";
 
 export const CHROME_EXTENSION_STORAGE_MODULE_NAME = "chromeExtensionStorage";
 
-export default class ChromeExtensionStorageModule implements IModule {
+export class ChromeExtensionStorageModule implements IModule {
   moduleName: string;
 
   tbSDK: ITKeyApi;
@@ -43,7 +43,7 @@ export default class ChromeExtensionStorageModule implements IModule {
     const metadata = this.tbSDK.getMetadata();
     const key = metadata.pubKey.x.toString("hex"); // tbkey public
     const result = await storage.sync.get(key);
-    const verifierIdObj: ShareStore = JSON.parse(result[key]);
+    const verifierIdObj: ShareStore = JSON.parse(result[key] as string);
     await this.tbSDK.inputShareStoreSafe(verifierIdObj);
     return verifierIdObj;
   }

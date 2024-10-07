@@ -5,8 +5,9 @@
   "author": "Torus Labs",
   "homepage": "https://github.com/tkey/tkey#readme",
   "license": "MIT",
-  "main": "dist/shareSerialization.cjs.js",
-  "module": "dist/shareSerialization.esm.js",
+  "sideEffects": false,
+  "main": "dist/lib.cjs/index.js",
+  "module": "dist/lib.esm/index.js",
   "unpkg": "dist/shareSerialization.umd.min.js",
   "jsdelivr": "dist/shareSerialization.umd.min.js",
   "types": "dist/types/index.d.ts",
@@ -44,7 +45,7 @@
   },
   "dependencies": {
     "@tkey-mpc/common-types": "^9.2.0",
-    "@types/create-hash": "1.2.2",
+    "@types/create-hash": "1.2.6",
     "bn.js": "^5.2.1",
     "ethereum-cryptography": "^2.1.2"
   },

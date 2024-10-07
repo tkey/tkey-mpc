@@ -14,9 +14,9 @@ import {
 import { generatePrivate } from "@toruslabs/eccrypto";
 import BN from "bn.js";
 
-import ShareTransferError from "./errors";
-import ShareRequest from "./ShareRequest";
-import ShareTransferStorePointer from "./ShareTransferStorePointer";
+import { ShareTransferError } from "./errors";
+import { ShareRequest } from "./ShareRequest";
+import { ShareTransferStorePointer } from "./ShareTransferStorePointer";
 import { getClientIp } from "./utils";
 
 export type ShareTransferStore = {
@@ -25,7 +25,7 @@ export type ShareTransferStore = {
 
 export const SHARE_TRANSFER_MODULE_NAME = "shareTransfer";
 
-class ShareTransferModule implements IModule {
+export class ShareTransferModule implements IModule {
   moduleName: string;
 
   tbSDK: ITKeyApi;
@@ -234,5 +234,3 @@ class ShareTransferModule implements IModule {
     clearInterval(this.requestStatusCheckId);
   }
 }
-
-export default ShareTransferModule;

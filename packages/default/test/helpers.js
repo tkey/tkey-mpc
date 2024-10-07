@@ -1,12 +1,12 @@
-import { ecCurve, getPubKeyPoint, Point } from "@tkey-mpc/common-types";
-import ServiceProviderBase from "@tkey-mpc/service-provider-base";
-import ServiceProviderTorus from "@tkey-mpc/service-provider-torus";
-import TorusStorageLayer, { MockStorageLayer } from "@tkey-mpc/storage-layer-torus";
+import { getPubKeyPoint, Point, secp256k1 } from "@tkey-mpc/common-types";
+import { ServiceProviderBase } from "@tkey-mpc/service-provider-base";
+import { TorusServiceProvider } from "@tkey-mpc/service-provider-torus";
+import { MockStorageLayer, TorusStorageLayer } from "@tkey-mpc/storage-layer-torus";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { generatePrivate } from "@toruslabs/eccrypto";
 import { generatePolynomial, getLagrangeCoeffs, getShare, hexPoint, MockServer, postEndpoint } from "@toruslabs/rss-client";
 // eslint-disable-next-line import/no-extraneous-dependencies
-import Torus from "@toruslabs/torus.js";
+import { Torus } from "@toruslabs/torus.js";
 import BN from "bn.js";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import KJUR from "jsrsasign";
@@ -39,7 +39,7 @@ export function getServiceProvider(params) {
   const { type, privKeyBN, isEmptyProvider } = params;
   const PRIVATE_KEY = privKeyBN ? privKeyBN.toString("hex") : generatePrivate().toString("hex");
   if (type === "TorusServiceProvider") {
-    return new ServiceProviderTorus({
+    return new TorusServiceProvider({
       postboxKey: isEmptyProvider ? null : PRIVATE_KEY,
       customAuthArgs: {
         network: "sapphire_mainnet",
@@ -66,7 +66,7 @@ export async function setupTSSMocks(opts) {
   for (let i = 0; i < serverCount; i++) {
     serverPrivKeys.push(new BN(generatePrivate()));
   }
-  const serverPubKeys = serverPrivKeys.map((privKey) => hexPoint(ecCurve.g.mul(privKey)));
+  const serverPubKeys = serverPrivKeys.map((privKey) => hexPoint(secp256k1.g.mul(privKey)));
   const serverThreshold = 3;
   await Promise.all(
     serverEndpoints.map((endpoint, i) => {
@@ -81,7 +81,7 @@ export async function setupTSSMocks(opts) {
   for (let j = 0; j < maxTSSNonceToSimulate; j++) {
     // simulate new key assign
     const dkg2Priv = new BN(generatePrivate());
-    const dkg2Pub = ecCurve.g.mul(dkg2Priv);
+    const dkg2Pub = secp256k1.g.mul(dkg2Priv);
     const serverPoly = generatePolynomial(serverThreshold - 1, dkg2Priv);
     serverDKGPrivKeys.push(serverPoly[0]);
     serverDKGPubKeys.push(getPubKeyPoint(serverPoly[0]));
@@ -204,6 +204,6 @@ export async function computeIndexedPrivateKey(tkey, factorKey, serverDKGPrivKey
   const tssPrivKey1 = getLagrangeCoeffs([1, retrievedTSSIndex1], 1)
     .mul(serverDKGPrivKeys.add(tkey.computeAccountNonce(accountIndex)))
     .add(getLagrangeCoeffs([1, retrievedTSSIndex1], retrievedTSSIndex1).mul(retrievedTSS1))
-    .umod(ecCurve.n);
+    .umod(secp256k1.n);
   return tssPrivKey1;
 }

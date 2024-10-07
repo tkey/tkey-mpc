@@ -3,14 +3,14 @@
 /* eslint-disable mocha/no-exports */
 /* eslint-disable import/no-extraneous-dependencies */
 
-import { ecCurve, getPubKeyPoint, KEY_NOT_FOUND, SHARE_DELETED, ShareStore, toPrivKeyEC } from "@tkey-mpc/common-types";
+import { getPubKeyPoint, KEY_NOT_FOUND, secp256k1, SHARE_DELETED, ShareStore, toPrivKeyEC } from "@tkey-mpc/common-types";
 import { Metadata } from "@tkey-mpc/core";
-import PrivateKeyModule, { ED25519Format, SECP256K1Format } from "@tkey-mpc/private-keys";
-import SecurityQuestionsModule from "@tkey-mpc/security-questions";
-import SeedPhraseModule, { MetamaskSeedPhraseFormat } from "@tkey-mpc/seed-phrase";
-import TorusServiceProvider from "@tkey-mpc/service-provider-torus";
-import ShareTransferModule from "@tkey-mpc/share-transfer";
-import TorusStorageLayer from "@tkey-mpc/storage-layer-torus";
+import { ED25519Format, PrivateKeyModule, SECP256K1Format } from "@tkey-mpc/private-keys";
+import { SecurityQuestionsModule } from "@tkey-mpc/security-questions";
+import { MetamaskSeedPhraseFormat, SeedPhraseModule } from "@tkey-mpc/seed-phrase";
+import { TorusServiceProvider } from "@tkey-mpc/service-provider-torus";
+import { ShareTransferModule } from "@tkey-mpc/share-transfer";
+import { TorusStorageLayer } from "@tkey-mpc/storage-layer-torus";
 import { generatePrivate } from "@toruslabs/eccrypto";
 import { post } from "@toruslabs/http-helpers";
 import { getLagrangeCoeffs } from "@toruslabs/rss-client";
@@ -21,7 +21,7 @@ import { JsonRpcProvider } from "ethers";
 import stringify from "json-stable-stringify";
 import { createSandbox } from "sinon";
 
-import ThresholdKey from "../src/index";
+import { ThresholdKey } from "../src/index";
 import {
   assignTssDkgKeys,
   computeIndexedPrivateKey,
@@ -116,9 +116,9 @@ export const sharedTestCases = (mode, torusSP, storageLayer) => {
       const { tssShare: tss2 } = await tb1.getTSSShare(factorKey);
 
       const tssCommits = tb1.getTSSCommits();
-      const tss2Pub = ecCurve.g.mul(tss2);
-      const tssCommitA0 = ecCurve.keyFromPublic({ x: tssCommits[0].x.toString(16, 64), y: tssCommits[0].y.toString(16, 64) }).getPublic();
-      const tssCommitA1 = ecCurve.keyFromPublic({ x: tssCommits[1].x.toString(16, 64), y: tssCommits[1].y.toString(16, 64) }).getPublic();
+      const tss2Pub = secp256k1.g.mul(tss2);
+      const tssCommitA0 = secp256k1.keyFromPublic({ x: tssCommits[0].x.toString(16, 64), y: tssCommits[0].y.toString(16, 64) }).getPublic();
+      const tssCommitA1 = secp256k1.keyFromPublic({ x: tssCommits[1].x.toString(16, 64), y: tssCommits[1].y.toString(16, 64) }).getPublic();
       const _tss2Pub =
         deviceTSSIndex === 2 ? tssCommitA0.add(tssCommitA1).add(tssCommitA1) : tssCommitA0.add(tssCommitA1).add(tssCommitA1).add(tssCommitA1);
       strictEqual(tss2Pub.x.toString(16, 64), _tss2Pub.x.toString(16, 64));
@@ -168,7 +168,7 @@ export const sharedTestCases = (mode, torusSP, storageLayer) => {
       const tssPrivKey = getLagrangeCoeffs([1, deviceTSSIndex], 1)
         .mul(tss1)
         .add(getLagrangeCoeffs([1, deviceTSSIndex], deviceTSSIndex).mul(tss2))
-        .umod(ecCurve.n);
+        .umod(secp256k1.n);
 
       const tssPubKey = getPubKeyPoint(tssPrivKey);
       strictEqual(tssPubKey.x.toString(16, 64), tssCommits[0].x.toString(16, 64));
@@ -219,7 +219,7 @@ export const sharedTestCases = (mode, torusSP, storageLayer) => {
       const tssPrivKey = getLagrangeCoeffs([1, retrievedTSSIndex], 1)
         .mul(serverDKGPrivKeys[0])
         .add(getLagrangeCoeffs([1, retrievedTSSIndex], retrievedTSSIndex).mul(retrievedTSS))
-        .umod(ecCurve.n);
+        .umod(secp256k1.n);
       const tssPubKey = getPubKeyPoint(tssPrivKey);
 
       strictEqual(tssPubKey.x.toString(16, 64), tssCommits[0].x.toString(16, 64));
@@ -249,7 +249,7 @@ export const sharedTestCases = (mode, torusSP, storageLayer) => {
       const tssPrivKey1 = getLagrangeCoeffs([1, retrievedTSSIndex1], 1)
         .mul(serverDKGPrivKeys1[0])
         .add(getLagrangeCoeffs([1, retrievedTSSIndex1], retrievedTSSIndex1).mul(retrievedTSS1))
-        .umod(ecCurve.n);
+        .umod(secp256k1.n);
       const tssPubKey1 = getPubKeyPoint(tssPrivKey1);
 
       strictEqual(tssPubKey1.x.toString(16, 64), tssCommits1[0].x.toString(16, 64));
@@ -279,7 +279,7 @@ export const sharedTestCases = (mode, torusSP, storageLayer) => {
       const tssPrivKeyImported = getLagrangeCoeffs([1, retrievedTSSIndexImported], 1)
         .mul(serverDKGPrivKeys1[0])
         .add(getLagrangeCoeffs([1, retrievedTSSIndexImported], retrievedTSSIndexImported).mul(retrievedTSSImported))
-        .umod(ecCurve.n);
+        .umod(secp256k1.n);
 
       const tssPubKeyImported = getPubKeyPoint(tssPrivKeyImported);
 
@@ -333,7 +333,7 @@ export const sharedTestCases = (mode, torusSP, storageLayer) => {
       const tssPrivKey = getLagrangeCoeffs([1, retrievedTSSIndex], 1)
         .mul(serverDKGPrivKeys[0])
         .add(getLagrangeCoeffs([1, retrievedTSSIndex], retrievedTSSIndex).mul(retrievedTSS))
-        .umod(ecCurve.n);
+        .umod(secp256k1.n);
       const tssPubKey = getPubKeyPoint(tssPrivKey);
 
       strictEqual(tssPubKey.x.toString(16, 64), tssCommits[0].x.toString(16, 64));
@@ -470,7 +470,7 @@ export const sharedTestCases = (mode, torusSP, storageLayer) => {
       const tssPrivKey = getLagrangeCoeffs([1, retrievedTSSIndex], 1)
         .mul(serverDKGPrivKeys[0])
         .add(getLagrangeCoeffs([1, retrievedTSSIndex], retrievedTSSIndex).mul(retrievedTSS))
-        .umod(ecCurve.n);
+        .umod(secp256k1.n);
 
       const tssPubKey = getPubKeyPoint(tssPrivKey);
       strictEqual(tssPubKey.x.toString(16, 64), tssCommits[0].x.toString(16, 64));
@@ -497,7 +497,7 @@ export const sharedTestCases = (mode, torusSP, storageLayer) => {
         const newTSSPrivKey = getLagrangeCoeffs([1, 2], 1)
           .mul(new BN(serverDKGPrivKeys[1], "hex"))
           .add(getLagrangeCoeffs([1, 2], 2).mul(newTSS2))
-          .umod(ecCurve.n);
+          .umod(secp256k1.n);
         strictEqual(tssPrivKey.toString(16, 64), newTSSPrivKey.toString(16, 64));
       }
 
@@ -506,7 +506,7 @@ export const sharedTestCases = (mode, torusSP, storageLayer) => {
         const newTSSPrivKey = getLagrangeCoeffs([1, 3], 1)
           .mul(new BN(serverDKGPrivKeys[1], "hex"))
           .add(getLagrangeCoeffs([1, 3], 3).mul(newTSS2))
-          .umod(ecCurve.n);
+          .umod(secp256k1.n);
         strictEqual(tssPrivKey.toString(16, 64), newTSSPrivKey.toString(16, 64));
       }
 
@@ -523,7 +523,7 @@ export const sharedTestCases = (mode, torusSP, storageLayer) => {
         const newTSSPrivKey = getLagrangeCoeffs([1, 2], 1)
           .mul(new BN(serverDKGPrivKeys[1], "hex"))
           .add(getLagrangeCoeffs([1, 2], 2).mul(newTSS2))
-          .umod(ecCurve.n);
+          .umod(secp256k1.n);
         strictEqual(tssPrivKey.toString(16, 64), newTSSPrivKey.toString(16, 64));
       }
 
@@ -532,7 +532,7 @@ export const sharedTestCases = (mode, torusSP, storageLayer) => {
         const newTSSPrivKey = getLagrangeCoeffs([1, 3], 1)
           .mul(new BN(serverDKGPrivKeys[1], "hex"))
           .add(getLagrangeCoeffs([1, 3], 3).mul(newTSS2))
-          .umod(ecCurve.n);
+          .umod(secp256k1.n);
         strictEqual(tssPrivKey.toString(16, 64), newTSSPrivKey.toString(16, 64));
       }
     });
@@ -603,7 +603,7 @@ export const sharedTestCases = (mode, torusSP, storageLayer) => {
         const tssPrivKey = getLagrangeCoeffs([1, retrievedTSSIndex], 1)
           .mul(serverDKGPrivKeys[1])
           .add(getLagrangeCoeffs([1, retrievedTSSIndex], retrievedTSSIndex).mul(retrievedTSS))
-          .umod(ecCurve.n);
+          .umod(secp256k1.n);
         const tssPubKey = getPubKeyPoint(tssPrivKey);
 
         strictEqual(tssPubKey.x.toString(16, 64), tssCommits[0].x.toString(16, 64));
@@ -702,7 +702,7 @@ export const sharedTestCases = (mode, torusSP, storageLayer) => {
         if (!customSP.useTSS) this.skip();
         const sp = customSP;
         let userInput = new BN(keccak256(Buffer.from("user answer blublu", "utf-8")).slice(2), "hex");
-        userInput = userInput.umod(ecCurve.curve.n);
+        userInput = userInput.umod(secp256k1.curve.n);
         const resp1 = await tb._initializeNewKey({ userInput, initializeModules: true });
 
         sp.verifierName = "torus-test-health";
@@ -730,7 +730,7 @@ export const sharedTestCases = (mode, torusSP, storageLayer) => {
         const tssPrivKey = getLagrangeCoeffs([1, tssIndex], 1)
           .mul(serverDKGPrivKeys[0])
           .add(getLagrangeCoeffs([1, tssIndex], tssIndex).mul(tssShare))
-          .umod(ecCurve.n);
+          .umod(secp256k1.n);
 
         const newFactorKey = new BN(generatePrivate());
         const newFactorPub = getPubKeyPoint(newFactorKey);
@@ -753,14 +753,14 @@ export const sharedTestCases = (mode, torusSP, storageLayer) => {
         const tssPrivKey2 = getLagrangeCoeffs([1, tssIndex2], 1)
           .mul(serverDKGPrivKeys[1])
           .add(getLagrangeCoeffs([1, tssIndex2], tssIndex2).mul(tssShare2))
-          .umod(ecCurve.n);
+          .umod(secp256k1.n);
         strictEqual(tssPrivKey.toString("hex"), tssPrivKey2.toString("hex"), "Incorrect tss key");
       });
 
       it(`#should serialize and deserialize correctly with tkeyArgs, manualSync=${mode}`, async function () {
         if (!customSP.useTSS) this.skip();
         let userInput = new BN(keccak256(Buffer.from("user answer blublu", "utf-8")).slice(2), "hex");
-        userInput = userInput.umod(ecCurve.curve.n);
+        userInput = userInput.umod(secp256k1.curve.n);
         const resp1 = await tb._initializeNewKey({ userInput, initializeModules: true });
 
         const sp = customSP;
@@ -788,7 +788,7 @@ export const sharedTestCases = (mode, torusSP, storageLayer) => {
         const tssPrivKey = getLagrangeCoeffs([1, tssIndex], 1)
           .mul(serverDKGPrivKeys[0])
           .add(getLagrangeCoeffs([1, tssIndex], tssIndex).mul(tssShare))
-          .umod(ecCurve.n);
+          .umod(secp256k1.n);
 
         const newFactorKey = new BN(generatePrivate());
         const newFactorPub = getPubKeyPoint(newFactorKey);
@@ -812,7 +812,7 @@ export const sharedTestCases = (mode, torusSP, storageLayer) => {
         const tssPrivKey2 = getLagrangeCoeffs([1, tssIndex2], 1)
           .mul(serverDKGPrivKeys[1])
           .add(getLagrangeCoeffs([1, tssIndex2], tssIndex2).mul(tssShare2))
-          .umod(ecCurve.n);
+          .umod(secp256k1.n);
         strictEqual(tssPrivKey.toString("hex"), tssPrivKey2.toString("hex"), "Incorrect tss key");
       });
       // TODO: add test for initialize such that initialize throws if the remote metadata is already there
@@ -836,7 +836,7 @@ export const sharedTestCases = (mode, torusSP, storageLayer) => {
         });
 
         let userInput = new BN(keccak256(Buffer.from("user answer blublu", "utf-8")).slice(2), "hex");
-        userInput = userInput.umod(ecCurve.curve.n);
+        userInput = userInput.umod(secp256k1.curve.n);
         const resp1 = await tb._initializeNewKey({ userInput, initializeModules: true });
 
         // generate and delete
@@ -866,7 +866,7 @@ export const sharedTestCases = (mode, torusSP, storageLayer) => {
       it(`#should serialize and deserialize correctly keeping localTransitions afterNewKeyAssign, manualSync=${mode}`, async function () {
         if (!customSP.useTSS) this.skip();
         let userInput = new BN(keccak256(Buffer.from("user answer blublu", "utf-8")).slice(2), "hex");
-        userInput = userInput.umod(ecCurve.curve.n);
+        userInput = userInput.umod(secp256k1.curve.n);
         const resp1 = await tb._initializeNewKey({ userInput, initializeModules: true });
         // TODO: tss initialize
         await tb.syncLocalMetadataTransitions();
@@ -945,7 +945,7 @@ export const sharedTestCases = (mode, torusSP, storageLayer) => {
 
     it(`#should be able to reconstruct key when initializing with user input, manualSync=${mode}`, async function () {
       let determinedShare = new BN(keccak256(Buffer.from("user answer blublu")).slice(2), "hex");
-      determinedShare = determinedShare.umod(ecCurve.curve.n);
+      determinedShare = determinedShare.umod(secp256k1.curve.n);
       const resp1 = await tb._initializeNewKey({ determinedShare, initializeModules: true });
       await tb.syncLocalMetadataTransitions();
 
@@ -975,7 +975,7 @@ export const sharedTestCases = (mode, torusSP, storageLayer) => {
 
     it(`#should be able to reconstruct key when initializing a with a share, manualSync=${mode}`, async function () {
       let userInput = new BN(keccak256(Buffer.from("user answer blublu")).slice(2), "hex");
-      userInput = userInput.umod(ecCurve.curve.n);
+      userInput = userInput.umod(secp256k1.curve.n);
       const resp1 = await tb._initializeNewKey({ userInput, initializeModules: true });
       await tb.syncLocalMetadataTransitions();
 
@@ -990,7 +990,7 @@ export const sharedTestCases = (mode, torusSP, storageLayer) => {
 
     it(`#should be able to reconstruct key after refresh and initializing with a share, manualSync=${mode}`, async function () {
       let userInput = new BN(keccak256(Buffer.from("user answer blublu")).slice(2), "hex");
-      userInput = userInput.umod(ecCurve.curve.n);
+      userInput = userInput.umod(secp256k1.curve.n);
       const resp1 = await tb._initializeNewKey({ userInput, initializeModules: true });
       const newShares = await tb.generateNewShare();
       await tb.syncLocalMetadataTransitions();
@@ -1007,7 +1007,7 @@ export const sharedTestCases = (mode, torusSP, storageLayer) => {
 
     it(`#should be able to reconstruct key after refresh and initializing with service provider, manualSync=${mode}`, async function () {
       let userInput = new BN(keccak256(Buffer.from("user answer blublu")).slice(2), "hex");
-      userInput = userInput.umod(ecCurve.curve.n);
+      userInput = userInput.umod(secp256k1.curve.n);
       const resp1 = await tb._initializeNewKey({ userInput, initializeModules: true });
       const newShares = await tb.generateNewShare();
       await tb.syncLocalMetadataTransitions();
@@ -1289,7 +1289,7 @@ export const sharedTestCases = (mode, torusSP, storageLayer) => {
 
     it(`#should serialize and deserialize correctly without tkeyArgs, manualSync=${mode}`, async function () {
       let userInput = new BN(keccak256(Buffer.from("user answer blublu")).slice(2), "hex");
-      userInput = userInput.umod(ecCurve.curve.n);
+      userInput = userInput.umod(secp256k1.curve.n);
       const resp1 = await tb._initializeNewKey({ userInput, initializeModules: true });
       await tb.generateNewShare();
       await tb.syncLocalMetadataTransitions();
@@ -1302,7 +1302,7 @@ export const sharedTestCases = (mode, torusSP, storageLayer) => {
 
     it(`#should serialize and deserialize correctly with tkeyArgs, manualSync=${mode}`, async function () {
       let userInput = new BN(keccak256(Buffer.from("user answer blublu")).slice(2), "hex");
-      userInput = userInput.umod(ecCurve.curve.n);
+      userInput = userInput.umod(secp256k1.curve.n);
       const resp1 = await tb._initializeNewKey({ userInput, initializeModules: true });
       await tb.generateNewShare();
       await tb.syncLocalMetadataTransitions();
@@ -1315,7 +1315,7 @@ export const sharedTestCases = (mode, torusSP, storageLayer) => {
 
     it(`#should serialize and deserialize correctly, keeping localTransitions consistent before syncing NewKeyAssign, manualSync=${mode}`, async function () {
       let userInput = new BN(keccak256(Buffer.from("user answer blublu")).slice(2), "hex");
-      userInput = userInput.umod(ecCurve.curve.n);
+      userInput = userInput.umod(secp256k1.curve.n);
       const resp1 = await tb._initializeNewKey({ userInput, initializeModules: true });
 
       // generate and delete
@@ -1343,7 +1343,7 @@ export const sharedTestCases = (mode, torusSP, storageLayer) => {
 
     it(`#should serialize and deserialize correctly keeping localTransitions afterNewKeyAssign, manualSync=${mode}`, async function () {
       let userInput = new BN(keccak256(Buffer.from("user answer blublu")).slice(2), "hex");
-      userInput = userInput.umod(ecCurve.curve.n);
+      userInput = userInput.umod(secp256k1.curve.n);
       const resp1 = await tb._initializeNewKey({ userInput, initializeModules: true });
       await tb.syncLocalMetadataTransitions();
       const reconstructedKey = await tb.reconstructKey();

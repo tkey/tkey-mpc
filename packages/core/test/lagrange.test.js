@@ -16,6 +16,7 @@ describe("lagrange interpolate", function () {
       fail("poly result should equal 7");
     }
   });
+
   it("#should interpolate random secrets correctly", async function () {
     const degree = Math.ceil(Math.random() * 10);
     const secret = new BN(generatePrivate());

@@ -1,10 +1,10 @@
-import { ecCurve, getPubKeyPoint } from "@tkey-mpc/common-types";
+import { getPubKeyPoint, secp256k1 } from "@tkey-mpc/common-types";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { generatePrivate } from "@toruslabs/eccrypto";
 import assert, { fail, notEqual, rejects, strictEqual } from "assert";
 import BN from "bn.js";
 
-import ThresholdKey from "../src/index";
+import { ThresholdKey } from "../src/index";
 import { assignTssDkgKeys, computeIndexedPrivateKey, fetchPostboxKeyAndSigs, getMetadataUrl, initStorageLayer } from "./helpers";
 
 const metadataURL = getMetadataUrl();
@@ -158,7 +158,7 @@ export const refreshAndAccountIndex = (customSP, manualSync, resetAccountSalt) =
       }
 
       const tssPrivKey1 = await computeIndexedPrivateKey(tb1, factorKey, serverDKGPrivKeys[0], 1);
-      const tssPubKeyIndex0 = ecCurve.keyFromPrivate(tssPrivKey1).getPublic();
+      const tssPubKeyIndex0 = secp256k1.keyFromPrivate(tssPrivKey1).getPublic();
 
       const pubKey1 = tb1.getTSSPub(1);
       strictEqual(tssPubKeyIndex0.x.toString(16, 64), pubKey1.x.toString(16, 64));
@@ -183,7 +183,7 @@ export const refreshAndAccountIndex = (customSP, manualSync, resetAccountSalt) =
       const tssPrivKeyIndex1 = await computeIndexedPrivateKey(tb1, factorKey, serverDKGPrivKeys[1], 1);
       const tssPrivKeyIndex2 = await computeIndexedPrivateKey(tb1, factorKey, serverDKGPrivKeys[1], 2);
 
-      const tssPubKeyIndex1 = ecCurve.keyFromPrivate(tssPrivKeyIndex1).getPublic();
+      const tssPubKeyIndex1 = secp256k1.keyFromPrivate(tssPrivKeyIndex1).getPublic();
 
       const pubKeyIndex1 = tb1.getTSSPub(1);
       strictEqual(tssPubKeyIndex1.x.toString(16, 64), pubKeyIndex1.x.toString(16, 64));
@@ -229,9 +229,9 @@ export const refreshAndAccountIndex = (customSP, manualSync, resetAccountSalt) =
 
         assert(tb2.computeAccountNonce(0).eq(new BN(0)), "nonce for account 0 should be 0");
         assert(tssShare.eq(tssShareIndex0), "tssShareIndex0 should be equal to tssShare");
-        assert(tssShare.add(nonce1).umod(ecCurve.n).eq(tssShareIndex1), "tssShareIndex1 should be equal to tssShare + nonce1");
-        assert(tssShare.add(nonce2).umod(ecCurve.n).eq(tssShareIndex2), "tssShareIndex2 should be equal to tssShare + nonce2");
-        assert(!tssShareIndex1.add(nonce1).umod(ecCurve.n).eq(tssShareIndex2), "tssShareIndex2 should not be equal to tssShareIndex1 + nonce1");
+        assert(tssShare.add(nonce1).umod(secp256k1.n).eq(tssShareIndex1), "tssShareIndex1 should be equal to tssShare + nonce1");
+        assert(tssShare.add(nonce2).umod(secp256k1.n).eq(tssShareIndex2), "tssShareIndex2 should be equal to tssShare + nonce2");
+        assert(!tssShareIndex1.add(nonce1).umod(secp256k1.n).eq(tssShareIndex2), "tssShareIndex2 should not be equal to tssShareIndex1 + nonce1");
       }
       // test case to ensure nonce mechanism
       {
@@ -240,21 +240,21 @@ export const refreshAndAccountIndex = (customSP, manualSync, resetAccountSalt) =
         notEqual(tssPubKeyIndex0.y.toString(16, 64), tssPubKeytb2Index2.y.toString(16, 64));
 
         const { tssShare: retrievedTSS } = await tb2.getTSSShare(factorKey);
-        const tssSharePub = ecCurve.keyFromPrivate(retrievedTSS.toString("hex")).getPublic();
+        const tssSharePub = secp256k1.keyFromPrivate(retrievedTSS.toString("hex")).getPublic();
         const { tssShare: retrievedTSSIndex1 } = await tb2.getTSSShare(factorKey, { accountIndex: 1 });
-        const tssSharePubIndex1 = ecCurve.keyFromPrivate(retrievedTSSIndex1.toString("hex")).getPublic();
+        const tssSharePubIndex1 = secp256k1.keyFromPrivate(retrievedTSSIndex1.toString("hex")).getPublic();
 
         const nonce = tb2.computeAccountNonce(1);
-        const noncePub = ecCurve.keyFromPrivate(nonce.toString("hex")).getPublic();
+        const noncePub = secp256k1.keyFromPrivate(nonce.toString("hex")).getPublic();
         const tssShareDerived = tssSharePub.add(noncePub);
 
         strictEqual(tssShareDerived.getX().toString("hex"), tssSharePubIndex1.getX().toString("hex"));
         strictEqual(tssShareDerived.getY().toString("hex"), tssSharePubIndex1.getY().toString("hex"));
 
         const { tssShare: retrievedTSS31 } = await tb2.getTSSShare(factorKey, { accountIndex: 2 });
-        const tssSharePub3 = ecCurve.keyFromPrivate(retrievedTSS31.toString("hex")).getPublic();
+        const tssSharePub3 = secp256k1.keyFromPrivate(retrievedTSS31.toString("hex")).getPublic();
         const nonce2 = tb2.computeAccountNonce(2);
-        const noncePub2 = ecCurve.keyFromPrivate(nonce2.toString("hex")).getPublic();
+        const noncePub2 = secp256k1.keyFromPrivate(nonce2.toString("hex")).getPublic();
         const tssShareDerived2 = tssSharePub.add(noncePub2);
         strictEqual(tssShareDerived2.getX().toString("hex"), tssSharePub3.getX().toString("hex"));
         strictEqual(tssShareDerived2.getY().toString("hex"), tssSharePub3.getY().toString("hex"));

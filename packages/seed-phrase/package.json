@@ -5,8 +5,9 @@
   "author": "Torus Labs",
   "homepage": "https://github.com/tkey/tkey#readme",
   "license": "MIT",
-  "main": "dist/seedPhrase.cjs.js",
-  "module": "dist/seedPhrase.esm.js",
+  "sideEffects": false,
+  "main": "dist/lib.cjs/index.js",
+  "module": "dist/lib.esm/index.js",
   "unpkg": "dist/seedPhrase.umd.min.js",
   "jsdelivr": "dist/seedPhrase.umd.min.js",
   "types": "dist/types/index.d.ts",
@@ -44,7 +45,7 @@
     "@tkey-mpc/common-types": "^9.2.0",
     "bip39": "^3.0.4",
     "bn.js": "^5.2.1",
-    "ethers": "^6.7.1"
+    "ethers": "^6.13.3"
   },
   "lint-staged": {
     "!(*d).ts": [

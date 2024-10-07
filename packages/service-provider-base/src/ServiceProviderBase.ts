@@ -16,7 +16,7 @@ import {
 import BN from "bn.js";
 import { curve } from "elliptic";
 
-class ServiceProviderBase implements IServiceProvider {
+export class ServiceProviderBase implements IServiceProvider {
   enableLogging: boolean;
 
   useTSS: boolean;
@@ -168,5 +168,3 @@ class ServiceProviderBase implements IServiceProvider {
     };
   }
 }
-
-export default ServiceProviderBase;

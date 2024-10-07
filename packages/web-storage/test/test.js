@@ -1,9 +1,9 @@
-import ThresholdKey from "@tkey-mpc/core";
+import { ThresholdKey } from "@tkey-mpc/core";
 import { ServiceProviderBase } from "@tkey-mpc/service-provider-base";
 import { MockStorageLayer, TorusStorageLayer } from "@tkey-mpc/storage-layer-torus";
 import { deepStrictEqual, strictEqual, throws } from "assert";
 
-import WebStorageModule, { WEB_STORAGE_MODULE_NAME } from "../src/WebStorageModule";
+import { WEB_STORAGE_MODULE_NAME, WebStorageModule } from "../src/WebStorageModule";
 
 const rejects = async (fn, error, msg) => {
   let f = () => {};
@@ -43,6 +43,7 @@ manualSyncModes.forEach((mode) => {
   describe("web storage", function () {
     let tb;
     let tb2;
+
     beforeEach("Setup ThresholdKey", async function () {
       tb = new ThresholdKey({
         serviceProvider: defaultSP,

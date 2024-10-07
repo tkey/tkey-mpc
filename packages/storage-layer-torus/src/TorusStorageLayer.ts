@@ -1,6 +1,5 @@
 import {
   decrypt,
-  ecCurve,
   encrypt,
   EncryptedMessage,
   getPubKeyECC,
@@ -11,6 +10,7 @@ import {
   ONE_KEY_DELETE_NONCE,
   ONE_KEY_NAMESPACE,
   prettyPrintError,
+  secp256k1,
   StringifiedType,
   toPrivKeyEC,
   toPrivKeyECC,
@@ -24,11 +24,11 @@ import { keccak256 } from "ethereum-cryptography/keccak";
 import stringify from "json-stable-stringify";
 
 function signDataWithPrivKey(data: { timestamp: number }, privKey: BN): string {
-  const sig = ecCurve.sign(keccak256(Buffer.from(stringify(data), "utf8")), toPrivKeyECC(privKey), "utf-8");
+  const sig = secp256k1.sign(keccak256(Buffer.from(stringify(data), "utf8")), toPrivKeyECC(privKey), "utf-8");
   return sig.toDER("hex");
 }
 
-class TorusStorageLayer implements IStorageLayer {
+export class TorusStorageLayer implements IStorageLayer {
   enableLogging: boolean;
 
   hostUrl: string;
@@ -109,15 +109,8 @@ class TorusStorageLayer implements IStorageLayer {
       );
       return await post<{ message: string }>(`${this.hostUrl}/set`, metadataParams);
     } catch (error: unknown) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let apiError: any;
-      try {
-        apiError = await (error as Response).json();
-      } catch (error2) {
-        // ignore error2. it means not an api error
-        throw error;
-      }
-      if (apiError) throw new Error(prettyPrintError(apiError));
+      const prettyError = await prettyPrintError(error);
+      throw prettyError as Error;
     }
   }
 
@@ -153,15 +146,8 @@ class TorusStorageLayer implements IStorageLayer {
       };
       return await post<{ message: string }>(`${this.hostUrl}/bulk_set_stream`, FD, options, customOptions);
     } catch (error) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let apiError: any;
-      try {
-        apiError = await (error as Response).json();
-      } catch (error2) {
-        // ignore error2. it means not an api error
-        throw error;
-      }
-      if (apiError) throw new Error(prettyPrintError(apiError));
+      const prettyError = await prettyPrintError(error);
+      throw prettyError as Error;
     }
   }
 
@@ -253,5 +239,3 @@ class TorusStorageLayer implements IStorageLayer {
     };
   }
 }
-
-export default TorusStorageLayer;

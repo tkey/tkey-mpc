@@ -1,5 +1,5 @@
 // import ServiceProviderBase from "@tkey-mpc/service-provider-base";
-import ServiceProviderTorus from "@tkey-mpc/service-provider-torus";
+import { TorusServiceProvider } from "@tkey-mpc/service-provider-torus";
 import { generatePrivate } from "@toruslabs/eccrypto";
 
 import { getMetadataUrl, initStorageLayer } from "./helpers";
@@ -7,7 +7,7 @@ import { sharedTestCases } from "./shared";
 
 const PRIVATE_KEY = generatePrivate().toString("hex");
 
-const torusSp = new ServiceProviderTorus({
+const torusSp = new TorusServiceProvider({
   postboxKey: PRIVATE_KEY,
   useTSS: true,
   // tssPubKey: {

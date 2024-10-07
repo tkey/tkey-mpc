@@ -1,7 +1,7 @@
 import { ISerializable, PolynomialID, PublicShare, SecurityQuestionStoreArgs, StringifiedType } from "@tkey-mpc/common-types";
 import BN from "bn.js";
 
-class SecurityQuestionStore implements ISerializable {
+export class SecurityQuestionStore implements ISerializable {
   nonce: BN;
 
   shareIndex: BN;
@@ -41,4 +41,3 @@ class SecurityQuestionStore implements ISerializable {
     };
   }
 }
-export default SecurityQuestionStore;

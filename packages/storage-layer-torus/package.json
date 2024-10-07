@@ -5,8 +5,9 @@
   "author": "Torus Labs",
   "homepage": "https://github.com/tkey/tkey#readme",
   "license": "MIT",
-  "main": "dist/storageLayerTorus.cjs.js",
-  "module": "dist/storageLayerTorus.esm.js",
+  "sideEffects": false,
+  "main": "dist/lib.cjs/index.js",
+  "module": "dist/lib.esm/index.js",
   "unpkg": "dist/storageLayerTorus.umd.min.js",
   "jsdelivr": "dist/storageLayerTorus.umd.min.js",
   "types": "dist/types/index.d.ts",
@@ -39,14 +40,14 @@
   },
   "dependencies": {
     "@tkey-mpc/common-types": "^9.2.0",
-    "@toruslabs/http-helpers": "^5.0.0",
+    "@toruslabs/http-helpers": "^7.0.0",
     "base64url": "3.0.1",
     "bn.js": "^5.2.1",
     "ethereum-cryptography": "^2.1.2",
-    "json-stable-stringify": "^1.0.2"
+    "json-stable-stringify": "^1.1.1"
   },
   "devDependencies": {
-    "@types/json-stable-stringify": "^1.0.34"
+    "@types/json-stable-stringify": "^1.0.36"
   },
   "bugs": {
     "url": "https://github.com/tkey/tkey/issues"

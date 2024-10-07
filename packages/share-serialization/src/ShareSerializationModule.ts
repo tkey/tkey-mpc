@@ -2,12 +2,12 @@ import { IModule, ITKeyApi } from "@tkey-mpc/common-types";
 import BN from "bn.js";
 
 import { english } from "./english";
-import ShareSerializationError from "./errors";
+import { ShareSerializationError } from "./errors";
 import { entropyToMnemonic, mnemonicToEntropy } from "./utils";
 
 export const SHARE_SERIALIZATION_MODULE_NAME = "shareSerialization";
 
-class ShareSerializationModule implements IModule {
+export class ShareSerializationModule implements IModule {
   moduleName: string;
 
   tbSDK: ITKeyApi;
@@ -44,5 +44,3 @@ class ShareSerializationModule implements IModule {
     throw ShareSerializationError.typeNotSupported();
   }
 }
-
-export default ShareSerializationModule;
