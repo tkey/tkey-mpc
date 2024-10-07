@@ -1,6 +1,6 @@
 {
   "name": "@tkey-mpc/default",
-  "version": "9.2.2",
+  "version": "10.0.0-alpha.0",
   "description": "TKey default library",
   "sideEffects": false,
   "main": "dist/lib.cjs/index.js",
@@ -35,20 +35,20 @@
     "src"
   ],
   "dependencies": {
-    "@tkey-mpc/common-types": "^9.2.0",
-    "@tkey-mpc/core": "^9.2.2",
-    "@tkey-mpc/security-questions": "^9.2.0",
-    "@tkey-mpc/service-provider-base": "^9.2.0",
-    "@tkey-mpc/service-provider-torus": "^9.2.0",
-    "@tkey-mpc/share-serialization": "^9.2.0",
-    "@tkey-mpc/share-transfer": "^9.2.0",
-    "@tkey-mpc/storage-layer-torus": "^9.2.1",
+    "@tkey-mpc/common-types": "^10.0.0-alpha.0",
+    "@tkey-mpc/core": "^10.0.0-alpha.0",
+    "@tkey-mpc/security-questions": "^10.0.0-alpha.0",
+    "@tkey-mpc/service-provider-base": "^10.0.0-alpha.0",
+    "@tkey-mpc/service-provider-torus": "^10.0.0-alpha.0",
+    "@tkey-mpc/share-serialization": "^10.0.0-alpha.0",
+    "@tkey-mpc/share-transfer": "^10.0.0-alpha.0",
+    "@tkey-mpc/storage-layer-torus": "^10.0.0-alpha.0",
     "@toruslabs/rss-client": "^2.0.0",
     "bn.js": "^5.2.1"
   },
   "devDependencies": {
-    "@tkey-mpc/private-keys": "^9.2.0",
-    "@tkey-mpc/seed-phrase": "^9.2.0",
+    "@tkey-mpc/private-keys": "^10.0.0-alpha.0",
+    "@tkey-mpc/seed-phrase": "^10.0.0-alpha.0",
     "@toruslabs/eccrypto": "^5.0.4",
     "@toruslabs/http-helpers": "^7.0.0",
     "@toruslabs/torus.js": "^15.1.0-0",

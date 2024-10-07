@@ -1,6 +1,6 @@
 {
   "name": "@tkey-mpc/chrome-storage",
-  "version": "9.2.0",
+  "version": "10.0.0-alpha.0",
   "description": "TKey Chrome Storage Module",
   "author": "Torus Labs",
   "homepage": "https://github.com/tkey/tkey#readme",
@@ -42,7 +42,7 @@
     "@babel/runtime": "7.x"
   },
   "dependencies": {
-    "@tkey-mpc/common-types": "^9.2.0",
+    "@tkey-mpc/common-types": "^10.0.0-alpha.0",
     "webextension-polyfill": "^0.12.0"
   },
   "devDependencies": {
