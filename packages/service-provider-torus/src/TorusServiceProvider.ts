@@ -82,10 +82,12 @@ export class TorusServiceProvider extends ServiceProviderBase {
     if (!this.verifierId) throw new Error("no verifierId, not logged in");
     if (!this.verifierName) throw new Error("no verifierName, not logged in");
 
-    const { torusNodeSSSEndpoints: tssNodeEndpoints, torusNodePub: torusPubKeys } = await this.customAuthInstance.nodeDetailManager.getNodeDetails({
-      verifier: this.verifierName,
-      verifierId: this.verifierId,
-    });
+    const { torusNodeSSSEndpoints: tssNodeEndpoints, torusNodePub: torusPubKeys } =
+      this.customAuthInstance?.config?.nodeDetails ||
+      (await this.customAuthInstance.nodeDetailManager.getNodeDetails({
+        verifier: this.verifierName,
+        verifierId: this.verifierId,
+      }));
     return {
       serverEndpoints: tssNodeEndpoints,
       serverPubKeys: torusPubKeys.map((key) => {
@@ -102,10 +104,12 @@ export class TorusServiceProvider extends ServiceProviderBase {
     if (!this.verifierId) throw new Error("no verifierId, not logged in");
     if (!this.verifierName) throw new Error("no verifierName, not logged in");
 
-    const { torusNodeRSSEndpoints: tssNodeEndpoints, torusNodePub: torusPubKeys } = await this.customAuthInstance.nodeDetailManager.getNodeDetails({
-      verifier: this.verifierName,
-      verifierId: this.verifierId,
-    });
+    const { torusNodeRSSEndpoints: tssNodeEndpoints, torusNodePub: torusPubKeys } =
+      this.customAuthInstance?.config?.nodeDetails ||
+      (await this.customAuthInstance.nodeDetailManager.getNodeDetails({
+        verifier: this.verifierName,
+        verifierId: this.verifierId,
+      }));
 
     return {
       serverEndpoints: tssNodeEndpoints,
