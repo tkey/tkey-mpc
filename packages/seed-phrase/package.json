@@ -1,6 +1,6 @@
 {
   "name": "@tkey-mpc/seed-phrase",
-  "version": "9.2.0",
+  "version": "9.2.3",
   "description": "TKey Seed Phrase Module",
   "author": "Torus Labs",
   "homepage": "https://github.com/tkey/tkey#readme",
@@ -42,7 +42,7 @@
     "@babel/runtime": "7.x"
   },
   "dependencies": {
-    "@tkey-mpc/common-types": "^9.2.0",
+    "@tkey-mpc/common-types": "^9.2.3",
     "bip39": "^3.0.4",
     "bn.js": "^5.2.1",
     "ethers": "^6.13.3"
