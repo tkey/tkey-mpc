@@ -39,7 +39,7 @@
     "@toruslabs/eccrypto": "^5.0.4",
     "@toruslabs/http-helpers": "^7.0.0",
     "@toruslabs/rss-client": "^2.0.0",
-    "@toruslabs/torus.js": "^15.1.0-0",
+    "@toruslabs/torus.js": "^15.1.0",
     "bn.js": "^5.2.1",
     "elliptic": "^6.5.7",
     "json-stable-stringify": "^1.1.1"
