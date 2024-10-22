@@ -1,6 +1,6 @@
 {
   "name": "@tkey-mpc/web-storage",
-  "version": "10.0.0",
+  "version": "10.0.1",
   "description": "TKey Web Storage Module",
   "author": "Torus Labs",
   "homepage": "https://github.com/tkey/tkey#readme",
@@ -50,7 +50,7 @@
   "devDependencies": {
     "@tkey-mpc/core": "^10.0.0",
     "@tkey-mpc/service-provider-base": "^10.0.0",
-    "@tkey-mpc/storage-layer-torus": "^10.0.0",
+    "@tkey-mpc/storage-layer-torus": "^10.0.1",
     "@types/filesystem": "^0.0.36"
   },
   "bugs": {

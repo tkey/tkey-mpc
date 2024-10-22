@@ -1,6 +1,6 @@
 {
   "name": "@tkey-mpc/default",
-  "version": "10.0.0",
+  "version": "10.0.1",
   "description": "TKey default library",
   "sideEffects": false,
   "main": "dist/lib.cjs/index.js",
@@ -42,7 +42,7 @@
     "@tkey-mpc/service-provider-torus": "^10.0.0",
     "@tkey-mpc/share-serialization": "^10.0.0",
     "@tkey-mpc/share-transfer": "^10.0.0",
-    "@tkey-mpc/storage-layer-torus": "^10.0.0",
+    "@tkey-mpc/storage-layer-torus": "^10.0.1",
     "@toruslabs/rss-client": "^2.0.0",
     "bn.js": "^5.2.1"
   },
