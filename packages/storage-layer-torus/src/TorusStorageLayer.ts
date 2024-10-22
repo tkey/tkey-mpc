@@ -135,9 +135,7 @@ export class TorusStorageLayer implements IStorageLayer {
       const options: RequestInit = {
         mode: "cors",
         method: "POST",
-        headers: {
-          "Content-Type": undefined,
-        },
+        headers: {},
       };
 
       const customOptions = {
